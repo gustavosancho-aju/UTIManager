@@ -39,7 +39,7 @@ export default function PacientesPage() {
     <div>
       <div className="flex items-center justify-between mb-7">
         <div>
-          <h1 className="text-2xl font-extrabold text-foreground">
+          <h1 className="text-2xl font-bold font-display text-foreground">
             Pacientes Internados
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -47,7 +47,7 @@ export default function PacientesPage() {
           </p>
         </div>
         <Link href="/pacientes/novo">
-          <Button className="bg-sky-600 hover:bg-sky-700 text-white gap-2">
+          <Button className="bg-primary hover:bg-primary/90 text-white gap-2">
             <Plus className="w-4 h-4" />
             Novo Paciente
           </Button>
@@ -55,8 +55,8 @@ export default function PacientesPage() {
       </div>
 
       {loading && (
-        <div className="bg-white rounded-2xl border border-border shadow-sm p-12 flex items-center justify-center">
-          <Loader2 className="w-6 h-6 animate-spin text-sky-600" />
+        <div className="glass-card rounded-xl p-12 flex items-center justify-center">
+          <Loader2 className="w-6 h-6 animate-spin text-primary" />
           <span className="ml-3 text-sm text-muted-foreground">
             Carregando pacientes...
           </span>
@@ -64,13 +64,13 @@ export default function PacientesPage() {
       )}
 
       {error && (
-        <div className="bg-white rounded-2xl border border-red-200 shadow-sm p-6 text-center">
-          <p className="text-sm text-red-600">{error}</p>
+        <div className="glass-card rounded-xl bg-destructive/10 border border-destructive/20 p-6 text-center">
+          <p className="text-sm text-destructive">{error}</p>
         </div>
       )}
 
       {!loading && !error && patients.length === 0 && (
-        <div className="bg-white rounded-2xl border border-border shadow-sm p-12 text-center">
+        <div className="glass-card rounded-xl p-12 text-center">
           <Users className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
           <h2 className="text-lg font-bold text-foreground mb-1">
             Nenhum paciente cadastrado
@@ -79,7 +79,7 @@ export default function PacientesPage() {
             Comece adicionando o primeiro paciente da UTI.
           </p>
           <Link href="/pacientes/novo">
-            <Button className="bg-sky-600 hover:bg-sky-700 text-white gap-2">
+            <Button className="bg-primary hover:bg-primary/90 text-white gap-2">
               <Plus className="w-4 h-4" />
               Novo Paciente
             </Button>
@@ -88,7 +88,7 @@ export default function PacientesPage() {
       )}
 
       {!loading && !error && patients.length > 0 && (
-        <div className="bg-white rounded-2xl border border-border shadow-sm overflow-hidden">
+        <div className="glass-card rounded-xl overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
@@ -102,11 +102,11 @@ export default function PacientesPage() {
             </TableHeader>
             <TableBody>
               {patients.map((patient) => (
-                <TableRow key={patient.id} className="hover:bg-sky-50/40">
+                <TableRow key={patient.id} className="hover:bg-primary/5">
                   <TableCell>
                     <Link
                       href={`/pacientes/${patient.id}`}
-                      className="font-bold text-sky-700 hover:underline"
+                      className="font-bold text-primary hover:underline"
                     >
                       {patient.bed}
                     </Link>
@@ -117,7 +117,7 @@ export default function PacientesPage() {
                   <TableCell>
                     <Link
                       href={`/pacientes/${patient.id}`}
-                      className="text-foreground hover:text-sky-700 hover:underline"
+                      className="text-foreground hover:text-primary hover:underline"
                     >
                       {patient.name}
                     </Link>
@@ -129,7 +129,7 @@ export default function PacientesPage() {
                     {patient.main_diagnosis}
                   </TableCell>
                   <TableCell>
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-sky-500/10 text-sky-700 border border-sky-500/20">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
                       {patient.clinical_status}
                     </span>
                   </TableCell>

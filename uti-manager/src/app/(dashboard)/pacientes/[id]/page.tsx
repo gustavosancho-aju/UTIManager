@@ -72,8 +72,8 @@ export default function PacienteDetailPage() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl border border-border shadow-sm p-12 flex items-center justify-center">
-        <Loader2 className="w-6 h-6 animate-spin text-sky-600" />
+      <div className="glass-card rounded-xl p-12 flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
         <span className="ml-3 text-sm text-muted-foreground">
           Carregando dados do paciente...
         </span>
@@ -86,13 +86,13 @@ export default function PacienteDetailPage() {
       <div>
         <Link
           href="/pacientes"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-sky-700 mb-4"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary mb-4"
         >
           <ArrowLeft className="w-4 h-4" />
           Voltar para Pacientes
         </Link>
-        <div className="bg-white rounded-2xl border border-red-200 shadow-sm p-6 text-center">
-          <p className="text-sm text-red-600">
+        <div className="glass-card rounded-xl bg-destructive/10 border border-destructive/20 p-6 text-center">
+          <p className="text-sm text-destructive">
             {error ?? "Paciente não encontrado"}
           </p>
         </div>
@@ -106,12 +106,12 @@ export default function PacienteDetailPage() {
         <div>
           <Link
             href="/pacientes"
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-sky-700 mb-3"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary mb-3"
           >
             <ArrowLeft className="w-4 h-4" />
             Voltar para Pacientes
           </Link>
-          <h1 className="text-2xl font-extrabold text-foreground">
+          <h1 className="text-2xl font-bold font-display text-foreground">
             {patient.name}
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -139,7 +139,7 @@ export default function PacienteDetailPage() {
           </Link>
           <Button
             variant="outline"
-            className="gap-2 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+            className="gap-2 text-destructive border-destructive/20 hover:bg-destructive/10 hover:text-red-700"
             onClick={handleDelete}
             disabled={deleting}
           >
@@ -154,7 +154,7 @@ export default function PacienteDetailPage() {
       </div>
 
       {/* Dados do Paciente */}
-      <div className="bg-white rounded-2xl border border-border shadow-sm p-6 mb-6">
+      <div className="glass-card rounded-xl p-6 mb-6">
         <h2 className="text-sm font-bold text-foreground uppercase tracking-wider mb-4">
           Identificação
         </h2>
@@ -163,7 +163,7 @@ export default function PacienteDetailPage() {
             <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">
               Leito
             </p>
-            <p className="text-lg font-extrabold text-sky-700 flex items-center gap-1.5">
+            <p className="text-lg font-bold font-display text-primary flex items-center gap-1.5">
               <Bed className="w-4 h-4" />
               {patient.bed}
             </p>
@@ -202,7 +202,7 @@ export default function PacienteDetailPage() {
       </div>
 
       {/* Dados Clínicos */}
-      <div className="bg-white rounded-2xl border border-border shadow-sm p-6 mb-6">
+      <div className="glass-card rounded-xl p-6 mb-6">
         <h2 className="text-sm font-bold text-foreground uppercase tracking-wider mb-4">
           Dados Clínicos
         </h2>
@@ -220,7 +220,7 @@ export default function PacienteDetailPage() {
             <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">
               Status Clínico
             </p>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-sky-500/10 text-sky-700 border border-sky-500/20">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
               {patient.clinical_status}
             </span>
           </div>
@@ -244,7 +244,7 @@ export default function PacienteDetailPage() {
       </div>
 
       {/* Evoluções */}
-      <div className="bg-white rounded-2xl border border-border shadow-sm p-6">
+      <div className="glass-card rounded-xl p-6">
         <h2 className="text-sm font-bold text-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
           <FileText className="w-4 h-4 text-muted-foreground" />
           Evoluções

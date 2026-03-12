@@ -52,12 +52,12 @@ export default function NovoPacientePage() {
       <div className="mb-7">
         <Link
           href="/pacientes"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-sky-700 mb-3"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary mb-3"
         >
           <ArrowLeft className="w-4 h-4" />
           Voltar para Pacientes
         </Link>
-        <h1 className="text-2xl font-extrabold text-foreground">
+        <h1 className="text-2xl font-bold font-display text-foreground">
           Novo Paciente
         </h1>
         <p className="text-sm text-muted-foreground">
@@ -66,13 +66,13 @@ export default function NovoPacientePage() {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-6">
-          <p className="text-sm text-red-600">{error}</p>
+        <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 mb-6">
+          <p className="text-sm text-destructive">{error}</p>
         </div>
       )}
 
       <form onSubmit={handleSubmit}>
-        <div className="bg-white rounded-2xl border border-border shadow-sm p-6 mb-6">
+        <div className="glass-card rounded-xl p-6 mb-6">
           <h2 className="text-sm font-bold text-foreground uppercase tracking-wider mb-4">
             Dados Pessoais
           </h2>
@@ -143,7 +143,7 @@ export default function NovoPacientePage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-border shadow-sm p-6 mb-6">
+        <div className="glass-card rounded-xl p-6 mb-6">
           <h2 className="text-sm font-bold text-foreground uppercase tracking-wider mb-4">
             Internação
           </h2>
@@ -225,7 +225,7 @@ export default function NovoPacientePage() {
           <Button
             type="submit"
             disabled={loading}
-            className="bg-sky-600 hover:bg-sky-700 text-white gap-2"
+            className="bg-primary hover:bg-primary/90 text-white gap-2"
           >
             {loading ? (
               <Loader2 className="w-4 h-4 animate-spin" />

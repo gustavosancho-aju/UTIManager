@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Hospital, Loader2 } from "lucide-react";
+import { Activity, Loader2, Mail, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
@@ -40,47 +40,74 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-50 to-slate-100">
-      <div className="w-full max-w-sm">
-        <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-8">
+    <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
+      {/* Background pattern */}
+      <div className="absolute inset-0 opacity-[0.03]" style={{
+        backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
+        backgroundSize: '40px 40px',
+      }} />
+
+      {/* Glow effect */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px]" />
+
+      <div className="w-full max-w-sm relative z-10 page-enter">
+        <div className="glass-card rounded-2xl p-8">
           <div className="flex flex-col items-center mb-8">
-            <div className="w-14 h-14 bg-gradient-to-br from-sky-500 to-sky-600 rounded-xl flex items-center justify-center mb-4">
-              <Hospital className="w-7 h-7 text-white" />
+            <div className="w-14 h-14 bg-primary rounded-xl flex items-center justify-center mb-5 glow-teal">
+              <Activity className="w-7 h-7 text-primary-foreground" />
             </div>
-            <h1 className="text-2xl font-bold text-slate-900">UTI Manager</h1>
-            <p className="text-sm text-slate-500 mt-1">HUSE • Sergipe</p>
+            <h1 className="font-display text-2xl font-bold text-foreground tracking-tight">UTI Manager</h1>
+            <p className="text-[12px] text-muted-foreground font-medium uppercase tracking-[0.15em] mt-1">HUSE &bull; Sergipe</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <Input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={loading}
-              />
+              <label htmlFor="email" className="block text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
+                Email
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="seu@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={loading}
+                  className="pl-10 h-11 bg-secondary/50 border-border focus:border-primary focus:ring-primary/20"
+                />
+              </div>
             </div>
             <div>
-              <Input
-                type="password"
-                placeholder="Senha"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={loading}
-              />
+              <label htmlFor="password" className="block text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
+                Senha
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={loading}
+                  className="pl-10 h-11 bg-secondary/50 border-border focus:border-primary focus:ring-primary/20"
+                />
+              </div>
             </div>
 
             {error && (
-              <p className="text-sm text-red-600 text-center">{error}</p>
+              <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+                <p className="text-[13px] text-destructive text-center">{error}</p>
+              </div>
             )}
 
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white"
+              className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold transition-all duration-200"
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
@@ -89,6 +116,10 @@ export default function LoginPage() {
             </Button>
           </form>
         </div>
+
+        <p className="text-center text-[11px] text-muted-foreground mt-6">
+          Sistema de Gestao de UTI &bull; v1.0
+        </p>
       </div>
     </div>
   );

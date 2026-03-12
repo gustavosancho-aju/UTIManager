@@ -8,12 +8,12 @@ export function GenderBadge({ gender }: GenderBadgeProps) {
   const isF = gender === "F";
   return (
     <span className={cn(
-      "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-bold border",
+      "inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold border",
       isF
-        ? "bg-pink-500/10 text-pink-600 border-pink-500/20"
-        : "bg-blue-500/10 text-blue-600 border-blue-500/20"
+        ? "bg-pink-500/10 text-pink-400 border-pink-500/15"
+        : "bg-blue-500/10 text-blue-400 border-blue-500/15"
     )}>
-      {isF ? "♀" : "♂"} {isF ? "Fem" : "Masc"}
+      {isF ? "F" : "M"}
     </span>
   );
 }

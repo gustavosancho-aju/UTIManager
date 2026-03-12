@@ -79,8 +79,8 @@ export default function EditarPacientePage() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl border border-border shadow-sm p-12 flex items-center justify-center">
-        <Loader2 className="w-6 h-6 animate-spin text-sky-600" />
+      <div className="glass-card rounded-xl p-12 flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
         <span className="ml-3 text-sm text-muted-foreground">
           Carregando dados do paciente...
         </span>
@@ -93,12 +93,12 @@ export default function EditarPacientePage() {
       <div className="mb-7">
         <Link
           href={`/pacientes/${id}`}
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-sky-700 mb-3"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary mb-3"
         >
           <ArrowLeft className="w-4 h-4" />
           Voltar para Detalhes
         </Link>
-        <h1 className="text-2xl font-extrabold text-foreground">
+        <h1 className="text-2xl font-bold font-display text-foreground">
           Editar Paciente
         </h1>
         <p className="text-sm text-muted-foreground">
@@ -107,8 +107,8 @@ export default function EditarPacientePage() {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-6">
-          <p className="text-sm text-red-600">{error}</p>
+        <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 mb-6">
+          <p className="text-sm text-destructive">{error}</p>
         </div>
       )}
 
