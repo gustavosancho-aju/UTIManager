@@ -57,6 +57,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (transcription.length > 50000) {
+      return NextResponse.json(
+        { error: "transcription too long (max 50000 chars)" },
+        { status: 400 }
+      );
+    }
+
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${apiKey}`,
       {

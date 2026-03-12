@@ -31,13 +31,22 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  // Allow API routes and static assets
+  // Allow static assets (but NOT /api/ai/ routes — those require auth)
   if (
-    pathname.startsWith("/api/") ||
     pathname.startsWith("/_next/") ||
     pathname.startsWith("/favicon") ||
     pathname.includes(".")
   ) {
+    return supabaseResponse;
+  }
+
+  // Protect AI API routes — require authentication
+  if (pathname.startsWith("/api/ai/") && !user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Allow other API routes (e.g. webhooks)
+  if (pathname.startsWith("/api/")) {
     return supabaseResponse;
   }
 
