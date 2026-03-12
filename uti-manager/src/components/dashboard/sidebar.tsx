@@ -15,9 +15,12 @@ import {
   LogOut,
   PanelLeftClose,
   PanelLeft,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { getPatients } from "@/lib/supabase/patients";
 import { createClient } from "@/lib/supabase/client";
+import { useTheme } from "@/hooks/useTheme";
 import type { Patient } from "@/types/database";
 
 const navItems = [
@@ -29,6 +32,7 @@ const navItems = [
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { theme, toggleTheme } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
   const [patientsOpen, setPatientsOpen] = useState(false);
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -180,7 +184,18 @@ export function Sidebar() {
 
       {/* Footer */}
       {!collapsed && (
-        <div className="border-t border-sidebar-border p-3">
+        <div className="border-t border-sidebar-border p-3 space-y-1">
+          <button
+            onClick={toggleTheme}
+            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all duration-200"
+          >
+            {theme === "dark" ? (
+              <Sun className="w-[18px] h-[18px]" />
+            ) : (
+              <Moon className="w-[18px] h-[18px]" />
+            )}
+            <span className="text-[13px] font-medium">{theme === "dark" ? "Modo Claro" : "Modo Escuro"}</span>
+          </button>
           <button
             onClick={handleLogout}
             className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200"
