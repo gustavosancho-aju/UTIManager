@@ -48,8 +48,8 @@ export default function EditarPacientePage() {
           main_diagnosis: patient.main_diagnosis,
           clinical_status: patient.clinical_status,
         });
-      } catch (err: any) {
-        setError(err.message ?? "Erro ao carregar paciente");
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Erro ao carregar paciente");
       } finally {
         setLoading(false);
       }
@@ -71,8 +71,8 @@ export default function EditarPacientePage() {
     try {
       await updatePatient(id, form);
       router.push(`/pacientes/${id}`);
-    } catch (err: any) {
-      setError(err.message ?? "Erro ao atualizar paciente");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erro ao atualizar paciente");
       setSaving(false);
     }
   }

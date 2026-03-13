@@ -46,6 +46,7 @@ export async function createPatient(
 
   const { data: patient, error } = await client
     .from("patients")
+    // Supabase self-referential Insert type resolves to never — known issue
     .insert(data as never)
     .select()
     .single();

@@ -33,7 +33,7 @@ export default function DashboardPage() {
   useEffect(() => {
     getDashboardData()
       .then(setData)
-      .catch(() => {})
+      .catch((err) => console.error("Failed to load dashboard:", err))
       .finally(() => setLoading(false));
   }, []);
 

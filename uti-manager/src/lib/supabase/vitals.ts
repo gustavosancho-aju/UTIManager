@@ -3,6 +3,7 @@ import type { Vital, Database } from "@/types/database";
 
 type VitalInsert = Database["public"]["Tables"]["vitals"]["Insert"];
 
+
 export async function getVitalsByPatient(patientId: string): Promise<Vital[]> {
   const client = createClient();
 
@@ -21,7 +22,7 @@ export async function getVitalsByPatient(patientId: string): Promise<Vital[]> {
 }
 
 export async function createVital(
-  data: Omit<Vital, "id" | "created_at">
+  data: VitalInsert
 ): Promise<Vital> {
   const client = createClient();
 

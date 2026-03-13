@@ -41,8 +41,8 @@ export default function NovoPacientePage() {
     try {
       await createPatient(form);
       router.push("/pacientes");
-    } catch (err: any) {
-      setError(err.message ?? "Erro ao criar paciente");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erro ao criar paciente");
       setLoading(false);
     }
   }

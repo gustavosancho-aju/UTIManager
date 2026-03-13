@@ -26,8 +26,8 @@ export default function PacientesPage() {
       try {
         const data = await getPatients();
         setPatients(data);
-      } catch (err: any) {
-        setError(err.message ?? "Erro ao carregar pacientes");
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Erro ao carregar pacientes");
       } finally {
         setLoading(false);
       }

@@ -18,7 +18,10 @@ export default function AudioPage() {
   useEffect(() => {
     getPatients()
       .then(setPatients)
-      .catch(() => setPatients([]));
+      .catch((err) => {
+        console.error("Failed to load patients:", err);
+        setPatients([]);
+      });
   }, []);
 
   const filtered = patients.filter(
@@ -49,7 +52,8 @@ export default function AudioPage() {
 
       <div className="grid grid-cols-2 gap-4">
         {/* Paciente Existente */}
-        <div
+        <button
+          type="button"
           onClick={() => setShowPatientList(!showPatientList)}
           className={`glass-card rounded-xl p-7 border-2 transition-all cursor-pointer text-center flex flex-col items-center gap-3.5 ${
             showPatientList
@@ -73,10 +77,11 @@ export default function AudioPage() {
               Atualizar laudo de um paciente ja cadastrado
             </div>
           </div>
-        </div>
+        </button>
 
         {/* Novo Paciente */}
-        <div
+        <button
+          type="button"
           onClick={() => router.push("/audio/gravar")}
           className="glass-card rounded-xl p-7 border-2 border-border hover:border-emerald-500 transition-all cursor-pointer text-center flex flex-col items-center gap-3.5"
         >
@@ -91,7 +96,7 @@ export default function AudioPage() {
               Cadastrar novo paciente via audio — a IA cria o registro
             </div>
           </div>
-        </div>
+        </button>
       </div>
 
       {/* Patient Selection List */}

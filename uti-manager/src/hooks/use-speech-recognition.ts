@@ -10,6 +10,7 @@ interface SpeechRecognitionInstance extends EventTarget {
   lang: string;
   continuous: boolean;
   interimResults: boolean;
+  maxAlternatives: number;
   start(): void;
   stop(): void;
   onresult: ((event: SpeechRecognitionEvent) => void) | null;
@@ -39,11 +40,13 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
 
   const [speechAvailable, setSpeechAvailable] = useState(false);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const getSpeechAPI = () =>
-    typeof window !== "undefined"
-      ? (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-      : null;
+  const getSpeechAPI = () => {
+    if (typeof window === "undefined") return null;
+    const w = window as unknown as Record<string, unknown>;
+    return (w.SpeechRecognition || w.webkitSpeechRecognition) as
+      | (new () => SpeechRecognitionInstance)
+      | null;
+  };
 
   useEffect(() => {
     setSpeechAvailable(!!getSpeechAPI());

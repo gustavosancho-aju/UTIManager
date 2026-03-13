@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
-import type { Checklist, Database } from "@/types/database";
+import type { Checklist, Database, Json } from "@/types/database";
 
 /**
  * Fetch a checklist by patient ID
@@ -29,9 +29,11 @@ export async function getChecklist(patientId: string): Promise<Checklist | null>
  * Creates if doesn't exist, updates if it does
  * Throws on error
  */
+type ChecklistInsert = Database["public"]["Tables"]["checklists"]["Insert"];
+
 export async function upsertChecklist(
   patientId: string,
-  data: Record<string, unknown>
+  data: Partial<Omit<ChecklistInsert, "patient_id">>
 ): Promise<Checklist> {
   try {
     const supabase = createClient();
