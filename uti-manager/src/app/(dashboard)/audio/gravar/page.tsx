@@ -122,7 +122,7 @@ function GravarPage() {
     <div className="max-w-2xl mx-auto">
       {/* Patient info */}
       {patient && (
-        <div className="mb-6 bg-white rounded-2xl border border-sky-200 p-4 text-center">
+        <div className="mb-6 glass-card rounded-xl border border-primary/20 p-4 text-center">
           <p className="text-sm text-muted-foreground">Registrando para:</p>
           <p className="text-base font-bold text-foreground">
             {patient.name} — Leito {patient.bed}
@@ -136,8 +136,8 @@ function GravarPage() {
           onClick={() => handleSwitchMode("audio")}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
             mode === "audio"
-              ? "bg-sky-500 text-white shadow-md shadow-sky-500/25"
-              : "bg-white text-muted-foreground border border-border hover:bg-muted/50"
+              ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
+              : "bg-card text-muted-foreground border border-border hover:bg-muted/50"
           }`}
         >
           <AudioLines className="w-4 h-4" />
@@ -147,8 +147,8 @@ function GravarPage() {
           onClick={() => handleSwitchMode("texto")}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
             mode === "texto"
-              ? "bg-sky-500 text-white shadow-md shadow-sky-500/25"
-              : "bg-white text-muted-foreground border border-border hover:bg-muted/50"
+              ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
+              : "bg-card text-muted-foreground border border-border hover:bg-muted/50"
           }`}
         >
           <Keyboard className="w-4 h-4" />
@@ -161,9 +161,9 @@ function GravarPage() {
         <>
           {/* Speech not available warning */}
           {!speechAvailable && (
-            <div className="mb-6 bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center gap-3">
-              <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
-              <p className="text-sm text-amber-800">
+            <div className="mb-6 bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex items-center gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
+              <p className="text-sm text-foreground">
                 Reconhecimento de voz não disponível neste navegador. Use o Google
                 Chrome ou alterne para o modo Digitar.
               </p>
@@ -178,13 +178,13 @@ function GravarPage() {
               className={`w-32 h-32 rounded-full flex items-center justify-center transition-all shadow-lg ${
                 recording
                   ? "bg-red-500 shadow-red-500/30 animate-pulse"
-                  : "bg-gradient-to-br from-sky-500 to-sky-400 shadow-sky-500/30 hover:shadow-sky-500/50 hover:scale-105"
+                  : "bg-primary shadow-primary/30 hover:shadow-primary/50 hover:scale-105"
               } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {recording ? (
-                <MicOff className="w-12 h-12 text-white" />
+                <MicOff className="w-12 h-12 text-primary-foreground" />
               ) : (
-                <Mic className="w-12 h-12 text-white" />
+                <Mic className="w-12 h-12 text-primary-foreground" />
               )}
             </button>
 
@@ -203,7 +203,7 @@ function GravarPage() {
           </div>
 
           {/* Transcription */}
-          <div className="bg-white rounded-2xl border border-border p-4 mb-6">
+          <div className="glass-card rounded-xl border border-border p-4 mb-6">
             <label className="text-sm font-semibold text-foreground mb-2 block">
               Transcrição
             </label>
@@ -227,15 +227,15 @@ function GravarPage() {
       {mode === "texto" && (
         <>
           <div className="flex flex-col items-center gap-3 mb-8">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-sky-500 to-sky-400 flex items-center justify-center shadow-lg shadow-sky-500/25">
-              <Keyboard className="w-9 h-9 text-white" />
+            <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/25">
+              <Keyboard className="w-9 h-9 text-primary-foreground" />
             </div>
             <p className="text-sm text-muted-foreground">
               Digite a evolução médica abaixo
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl border border-border p-4 mb-6">
+          <div className="glass-card rounded-xl border border-border p-4 mb-6">
             <label className="text-sm font-semibold text-foreground mb-2 block">
               Texto da evolução
             </label>
@@ -255,12 +255,12 @@ function GravarPage() {
 
       {/* Error messages */}
       {error && (
-        <div className="mb-4 bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700">
+        <div className="mb-4 bg-destructive/10 border border-destructive/20 rounded-xl p-3 text-sm text-destructive">
           {error}
         </div>
       )}
       {sendError && (
-        <div className="mb-4 bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700">
+        <div className="mb-4 bg-destructive/10 border border-destructive/20 rounded-xl p-3 text-sm text-destructive">
           {sendError}
         </div>
       )}
@@ -271,7 +271,7 @@ function GravarPage() {
           <Button
             onClick={handleSendToAI}
             disabled={!podeSalvar || sending}
-            className="w-full bg-gradient-to-r from-sky-500 to-sky-400 hover:from-sky-600 hover:to-sky-500 text-white"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             {sending ? (
               <>
@@ -298,7 +298,7 @@ function GravarPage() {
           <Button
             onClick={handleSendToAI}
             disabled={!podeSalvar || sending}
-            className="w-full bg-gradient-to-r from-sky-500 to-sky-400 hover:from-sky-600 hover:to-sky-500 text-white"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             {sending ? (
               <>

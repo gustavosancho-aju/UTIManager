@@ -113,7 +113,7 @@ export default function EditarPacientePage() {
       )}
 
       <form onSubmit={handleSubmit}>
-        <div className="bg-white rounded-2xl border border-border shadow-sm p-6 mb-6">
+        <div className="glass-card rounded-xl p-6 mb-6">
           <h2 className="text-sm font-bold text-foreground uppercase tracking-wider mb-4">
             Dados Pessoais
           </h2>
@@ -184,7 +184,7 @@ export default function EditarPacientePage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-border shadow-sm p-6 mb-6">
+        <div className="glass-card rounded-xl p-6 mb-6">
           <h2 className="text-sm font-bold text-foreground uppercase tracking-wider mb-4">
             Internação
           </h2>
@@ -266,7 +266,7 @@ export default function EditarPacientePage() {
           <Button
             type="submit"
             disabled={saving}
-            className="bg-sky-600 hover:bg-sky-700 text-white gap-2"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
           >
             {saving ? (
               <Loader2 className="w-4 h-4 animate-spin" />

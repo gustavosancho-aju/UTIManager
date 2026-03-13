@@ -157,8 +157,8 @@ export default function VitaisPage() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl border border-border shadow-sm p-12 flex items-center justify-center">
-        <Loader2 className="w-6 h-6 animate-spin text-sky-600" />
+      <div className="glass-card rounded-xl p-12 flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
         <span className="ml-3 text-sm text-muted-foreground">
           Carregando sinais vitais...
         </span>
@@ -171,13 +171,13 @@ export default function VitaisPage() {
       <div>
         <Link
           href={`/pacientes/${id}`}
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-sky-700 mb-4"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary mb-4"
         >
           <ArrowLeft className="w-4 h-4" />
           Voltar para Paciente
         </Link>
-        <div className="bg-white rounded-2xl border border-red-200 shadow-sm p-6 text-center">
-          <p className="text-sm text-red-600">{error}</p>
+        <div className="glass-card rounded-xl p-6 text-center">
+          <p className="text-sm text-destructive">{error}</p>
         </div>
       </div>
     );
@@ -195,7 +195,7 @@ export default function VitaisPage() {
         <div>
           <Link
             href={`/pacientes/${id}`}
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-sky-700 mb-3"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary mb-3"
           >
             <ArrowLeft className="w-4 h-4" />
             Voltar para Paciente
@@ -232,14 +232,14 @@ export default function VitaisPage() {
 
       {/* Error banner */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-6">
-          <p className="text-sm text-red-600">{error}</p>
+        <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 mb-6">
+          <p className="text-sm text-destructive">{error}</p>
         </div>
       )}
 
       {/* New vital form */}
       {showForm && (
-        <div className="bg-white rounded-2xl border border-border shadow-sm p-6 mb-6">
+        <div className="glass-card rounded-xl p-6 mb-6">
           <h2 className="text-sm font-bold text-foreground uppercase tracking-wider mb-4">
             Novo Registro de Sinais Vitais
           </h2>
@@ -341,7 +341,7 @@ export default function VitaisPage() {
 
       {/* Timeline */}
       {vitals.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-border shadow-sm p-12 text-center">
+        <div className="glass-card rounded-xl p-12 text-center">
           <HeartPulse className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
           <p className="text-sm text-muted-foreground">
             Nenhum registro de sinais vitais
@@ -359,28 +359,28 @@ export default function VitaisPage() {
               {/* Timeline for this date */}
               <div className="relative pl-8">
                 {/* Vertical line */}
-                <div className="absolute left-3 top-0 bottom-0 w-0.5 bg-sky-200" />
+                <div className="absolute left-3 top-0 bottom-0 w-0.5 bg-primary/20" />
 
                 <div className="space-y-4">
                   {grouped[date].map((vital) => (
                     <div key={vital.id} className="relative">
                       {/* Timeline dot */}
-                      <div className="absolute -left-8 top-4 w-6 h-6 rounded-full bg-sky-100 border-2 border-sky-400 flex items-center justify-center">
-                        <div className="w-2 h-2 rounded-full bg-sky-500" />
+                      <div className="absolute -left-8 top-4 w-6 h-6 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center">
+                        <div className="w-2 h-2 rounded-full bg-primary" />
                       </div>
 
                       {/* Vital card */}
-                      <div className="bg-white rounded-2xl border border-border shadow-sm p-5">
+                      <div className="glass-card rounded-xl p-5">
                         <div className="flex items-start justify-between mb-3">
                           {/* Time badge */}
-                          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-100 text-sky-700">
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-primary/10 text-primary">
                             {vital.time}
                           </span>
 
                           {/* Delete button */}
                           <button
                             onClick={() => handleDelete(vital.id)}
-                            className="text-muted-foreground hover:text-red-500 transition-colors p-1 rounded-lg hover:bg-red-50"
+                            className="text-muted-foreground hover:text-destructive transition-colors p-1 rounded-lg hover:bg-destructive/10"
                             title="Excluir registro"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -390,7 +390,7 @@ export default function VitaisPage() {
                         {/* Vital indicators */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                           <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center">
+                            <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center">
                               <Heart className="w-4 h-4 text-rose-500" />
                             </div>
                             <div>
@@ -404,7 +404,7 @@ export default function VitaisPage() {
                           </div>
 
                           <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center">
+                            <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
                               <Activity className="w-4 h-4 text-orange-500" />
                             </div>
                             <div>
@@ -420,7 +420,7 @@ export default function VitaisPage() {
                           </div>
 
                           <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
+                            <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
                               <Thermometer className="w-4 h-4 text-amber-500" />
                             </div>
                             <div>
@@ -436,8 +436,8 @@ export default function VitaisPage() {
                           </div>
 
                           <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-lg bg-sky-50 flex items-center justify-center">
-                              <Droplets className="w-4 h-4 text-sky-500" />
+                            <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center">
+                              <Droplets className="w-4 h-4 text-primary" />
                             </div>
                             <div>
                               <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">

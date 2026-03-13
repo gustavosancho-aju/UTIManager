@@ -36,8 +36,8 @@ export default function AudioPage() {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="text-center mb-9">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-600 to-green-500 inline-flex items-center justify-center shadow-lg shadow-green-600/25 mb-4">
-          <Mic className="w-7 h-7 text-white" />
+        <div className="w-16 h-16 rounded-2xl bg-emerald-600 inline-flex items-center justify-center shadow-lg shadow-emerald-600/25 mb-4">
+          <Mic className="w-7 h-7 text-primary-foreground" />
         </div>
         <h1 className="text-2xl font-extrabold text-foreground mb-1">
           Novo Laudo por Audio
@@ -51,14 +51,14 @@ export default function AudioPage() {
         {/* Paciente Existente */}
         <div
           onClick={() => setShowPatientList(!showPatientList)}
-          className={`bg-white rounded-2xl p-7 border-2 transition-all cursor-pointer text-center flex flex-col items-center gap-3.5 ${
+          className={`glass-card rounded-xl p-7 border-2 transition-all cursor-pointer text-center flex flex-col items-center gap-3.5 ${
             showPatientList
-              ? "border-sky-500 shadow-lg shadow-sky-500/10"
-              : "border-border hover:border-sky-500"
+              ? "border-primary shadow-lg shadow-primary/10"
+              : "border-border hover:border-primary"
           }`}
         >
-          <div className="w-13 h-13 rounded-xl bg-gradient-to-br from-sky-500 to-sky-400 flex items-center justify-center">
-            <Mic className="w-6 h-6 text-white" />
+          <div className="w-13 h-13 rounded-xl bg-primary flex items-center justify-center">
+            <Mic className="w-6 h-6 text-primary-foreground" />
           </div>
           <div>
             <div className="text-base font-bold text-foreground mb-1 flex items-center justify-center gap-1">
@@ -78,10 +78,10 @@ export default function AudioPage() {
         {/* Novo Paciente */}
         <div
           onClick={() => router.push("/audio/gravar")}
-          className="bg-white rounded-2xl p-7 border-2 border-border hover:border-green-500 transition-all cursor-pointer text-center flex flex-col items-center gap-3.5"
+          className="glass-card rounded-xl p-7 border-2 border-border hover:border-emerald-500 transition-all cursor-pointer text-center flex flex-col items-center gap-3.5"
         >
-          <div className="w-13 h-13 rounded-xl bg-gradient-to-br from-green-600 to-green-500 flex items-center justify-center">
-            <UserPlus className="w-6 h-6 text-white" />
+          <div className="w-13 h-13 rounded-xl bg-emerald-600 flex items-center justify-center">
+            <UserPlus className="w-6 h-6 text-primary-foreground" />
           </div>
           <div>
             <div className="text-base font-bold text-foreground mb-1">
@@ -96,7 +96,7 @@ export default function AudioPage() {
 
       {/* Patient Selection List */}
       {showPatientList && (
-        <div className="mt-4 bg-white rounded-2xl border-2 border-sky-200 overflow-hidden">
+        <div className="mt-4 glass-card rounded-xl border-2 border-primary/20 overflow-hidden">
           <div className="p-3 border-b border-border">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -120,9 +120,9 @@ export default function AudioPage() {
                   key={patient.id}
                   onClick={() => handleSelectPatient(patient.id)}
                   disabled={loading}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-sky-50 transition-colors text-left border-b border-border last:border-b-0"
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-primary/5 transition-colors text-left border-b border-border last:border-b-0"
                 >
-                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-sky-500 to-sky-400 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                  <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold shrink-0">
                     {patient.initials}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -133,7 +133,7 @@ export default function AudioPage() {
                       Leito {patient.bed} — {patient.unit}
                     </div>
                   </div>
-                  <span className="shrink-0 text-xs font-medium text-sky-600 border border-sky-200 rounded-md px-2.5 py-1">
+                  <span className="shrink-0 text-xs font-medium text-primary border border-primary/20 rounded-md px-2.5 py-1">
                     Selecionar
                   </span>
                 </button>

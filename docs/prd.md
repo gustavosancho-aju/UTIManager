@@ -22,6 +22,7 @@ O UTI Manager resolve esse problema oferecendo um sistema web especializado para
 | Data | Versão | Descrição | Autor |
 |------|--------|-----------|-------|
 | 2026-03-12 | 1.0 | PRD inicial — Sprint 1 completo (53 pontos) | @pm |
+| 2026-03-12 | 1.1 | Redesign premium (dark/light mode, nova paleta, tipografia) + segurança API | @sm |
 
 ---
 
@@ -58,6 +59,8 @@ O UTI Manager resolve esse problema oferecendo um sistema web especializado para
 | FR-25 | A sidebar deve ser colapsável e exibir lista de pacientes para navegação rápida |
 | FR-26 | O fluxo de áudio deve permitir selecionar o paciente antes de iniciar gravação |
 | FR-27 | Componentes compartilhados: StatusBadge, CheckIcon, GenderBadge, VitalCard, MiniInfo, DeviceCard |
+| FR-28 | O sistema deve permitir alternar entre tema escuro (dark) e claro (light) com persistência via localStorage |
+| FR-29 | A API `/api/ai/extract` deve exigir autenticação (retornar 401 se não autenticado) e limitar input a 50.000 caracteres |
 
 ### 2.2 Requisitos Não-Funcionais
 
@@ -80,15 +83,17 @@ O UTI Manager resolve esse problema oferecendo um sistema web especializado para
 
 ### 3.1 Visão UX
 
-Interface clínica otimizada para uso rápido durante rounds de UTI. Prioriza escaneabilidade visual (badges coloridos, cards, indicadores de status) e entrada de dados por voz para minimizar digitação.
+Interface clínica premium otimizada para uso rápido durante rounds de UTI. Estética "Clinical Luxury" com tema escuro como padrão e alternância para modo claro. Prioriza escaneabilidade visual (badges coloridos, glass cards, indicadores de status, glow effects) e entrada de dados por voz para minimizar digitação.
 
 ### 3.2 Paradigmas de Interação
 
 - **Voice-first:** Gravação de voz como modo primário de entrada de dados clínicos
-- **Card-based:** Informações de pacientes apresentadas em cards com indicadores visuais
+- **Card-based:** Informações de pacientes apresentadas em glass cards com indicadores visuais
 - **Color-coded alerts:** Vermelho para valores críticos, badges coloridos por status e gênero
 - **Progressive disclosure:** Sidebar colapsável, detalhes expandidos sob demanda
 - **Tri-state controls:** Checklists com Sim/Não/N/A para captura rápida
+- **Dark/Light toggle:** Alternância de tema persistida via localStorage com dark mode como padrão
+- **Glassmorphism:** Cards com backdrop-blur (dark) ou sombras sutis (light) para profundidade visual
 
 ### 3.3 Telas Principais
 
@@ -113,11 +118,16 @@ Interface clínica otimizada para uso rápido durante rounds de UTI. Prioriza es
 - Componentes shadcn/ui com suporte a teclado e screen readers
 - Badges e indicadores visuais com significado semântico (não apenas cor)
 
-### 3.5 Branding
+### 3.5 Branding & Design System
 
-- Tema azul-celeste (sky/blue) remetendo ao universo hospitalar
-- Ícone Hospital como marca do sistema
-- Identificação: **UTI Manager — HUSE Sergipe**
+- **Paleta primária:** Teal/Emerald (oklch 0.7 0.15 180 dark / oklch 0.55 0.15 180 light) — transmite confiança e ambiente clínico
+- **Tipografia:** Outfit (display/headings), DM Sans (body), JetBrains Mono (dados numéricos/vitais)
+- **Tema padrão:** Dark mode com backgrounds em oklch deep blue-gray e cards glass
+- **Tema alternativo:** Light mode com fundos brancos, sombras sutis e teal mais escuro para contraste
+- **Efeitos visuais:** Glass cards (backdrop-blur), glow-teal (box-shadow sutil), pulse-alert (animação para alertas), fade-slide-up (transições de página)
+- **Scrollbar customizada:** 6px, transparente com thumb semi-transparente
+- **Ícone:** Activity (pulso cardíaco) como marca do sistema com glow teal
+- **Identificação:** **UTI Manager — HUSE Sergipe**
 
 ### 3.6 Plataformas
 
@@ -136,7 +146,7 @@ Monorepo — aplicação Next.js única em `/home/gustavo/rafabastos/uti-manager
 ### 4.2 Arquitetura
 
 - **Framework:** Next.js 16 com App Router (Server Components + Client Components)
-- **Estilização:** Tailwind CSS + shadcn/ui
+- **Estilização:** Tailwind CSS 4 + shadcn/ui + design system oklch (dark/light)
 - **Backend-as-a-Service:** Supabase (PostgreSQL, Auth, RLS)
 - **IA:** Google Gemini 3.1 Flash Lite Preview via API Route server-side
 - **Speech:** Web Speech API (navegador, pt-BR)
@@ -182,6 +192,14 @@ Estado atual: nenhum teste automatizado implementado. Planejado para Sprint 2 (E
 |-------|--------|--------|--------|
 | 1.9 | Autenticação (Supabase Auth, login, middleware) | 2 | Done |
 | 1.10 | Dashboard (KPIs, Mapa de Leitos, Dispositivos, Alertas) | 2 | Done |
+
+### Epic 3.1: Redesign Premium e Segurança API (DONE)
+
+| Story | Título | Pontos | Status |
+|-------|--------|--------|--------|
+| 1.11 | Redesign premium: paleta teal/oklch, tipografia (Outfit/DM Sans/JetBrains Mono), glass cards, efeitos visuais | 8 | Done |
+| 1.12 | Dark/Light mode toggle com persistência localStorage | 3 | Done |
+| 1.13 | Proteção da API de IA (auth obrigatória + limite 50k chars) | 2 | Done |
 
 ### Epic 4: Melhorias e Qualidade (PLANNED)
 

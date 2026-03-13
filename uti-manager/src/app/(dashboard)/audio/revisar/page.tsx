@@ -262,7 +262,7 @@ export default function RevisarPage() {
       </div>
 
       {/* Transcription collapsible */}
-      <div className="bg-white rounded-2xl border border-border mb-6">
+      <div className="glass-card rounded-xl border border-border mb-6">
         <button
           onClick={() => setShowTranscription(!showTranscription)}
           className="w-full flex items-center justify-between p-4"
@@ -281,7 +281,7 @@ export default function RevisarPage() {
         </button>
         {showTranscription && (
           <div className="px-4 pb-4">
-            <p className="text-sm text-muted-foreground whitespace-pre-wrap bg-slate-50 rounded-xl p-3">
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap bg-muted rounded-xl p-3">
               {transcription}
             </p>
           </div>
@@ -347,7 +347,7 @@ export default function RevisarPage() {
               key={key}
               className={`rounded-xl border p-3 transition-colors ${
                 devices[key].active
-                  ? "border-sky-300 bg-sky-50/50"
+                  ? "border-primary/20 bg-primary/5"
                   : "border-border"
               }`}
             >
@@ -358,7 +358,7 @@ export default function RevisarPage() {
                   onChange={(e) =>
                     updateDevice(key, "active", e.target.checked)
                   }
-                  className="w-4 h-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500"
+                  className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
                 />
                 <span className="text-sm font-medium text-foreground">
                   {DEVICE_LABELS[key]}
@@ -435,7 +435,7 @@ export default function RevisarPage() {
 
       {/* Error */}
       {saveError && (
-        <div className="mb-4 bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700">
+        <div className="mb-4 bg-destructive/10 border border-destructive/20 rounded-xl p-3 text-sm text-destructive">
           {saveError}
         </div>
       )}
@@ -452,7 +452,7 @@ export default function RevisarPage() {
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="flex-1 bg-gradient-to-r from-sky-500 to-sky-400 hover:from-sky-600 hover:to-sky-500 text-white"
+          className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
         >
           {saving ? (
             <>
@@ -479,7 +479,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-border p-5 mb-4">
+    <div className="glass-card rounded-xl border border-border p-5 mb-4">
       <h2 className="text-base font-bold text-foreground mb-4">{title}</h2>
       {children}
     </div>

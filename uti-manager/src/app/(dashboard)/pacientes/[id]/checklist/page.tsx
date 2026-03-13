@@ -187,7 +187,7 @@ export default function ChecklistPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-sky-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -196,20 +196,20 @@ export default function ChecklistPage() {
   const overallPct = overall.total > 0 ? Math.round((overall.answered / overall.total) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-12">
+    <div className="min-h-screen bg-background pb-12">
       {/* Header */}
-      <div className="bg-sky-600 text-white px-4 py-6 sm:px-6">
+      <div className="bg-primary text-primary-foreground px-4 py-6 sm:px-6">
         <div className="max-w-5xl mx-auto">
           <button
             onClick={() => router.push(`/pacientes/${id}`)}
-            className="flex items-center gap-1 text-sky-100 hover:text-white mb-3 text-sm"
+            className="flex items-center gap-1 text-primary-foreground/70 hover:text-primary-foreground mb-3 text-sm"
           >
             <ArrowLeft className="h-4 w-4" />
             Voltar
           </button>
           <h1 className="text-2xl font-bold">Checklist Diário</h1>
           {patient && (
-            <p className="text-sky-100 mt-1">
+            <p className="text-primary-foreground/70 mt-1">
               {patient.name} — Leito {patient.bed}
             </p>
           )}
@@ -222,9 +222,9 @@ export default function ChecklistPage() {
                 {overall.answered}/{overall.total} ({overallPct}%)
               </span>
             </div>
-            <div className="w-full bg-sky-800 rounded-full h-2.5">
+            <div className="w-full bg-primary/20 rounded-full h-2.5">
               <div
-                className="bg-white rounded-full h-2.5 transition-all duration-300"
+                className="bg-primary rounded-full h-2.5 transition-all duration-300"
                 style={{ width: `${overallPct}%` }}
               />
             </div>
@@ -245,19 +245,19 @@ export default function ChecklistPage() {
             return (
               <div
                 key={section.key}
-                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5"
+                className="glass-card rounded-xl border border-border p-5"
               >
                 <div className="flex items-center justify-between mb-3">
-                  <h2 className="font-semibold text-gray-800">{section.title}</h2>
-                  <span className="text-xs text-gray-500">
+                  <h2 className="font-semibold text-foreground">{section.title}</h2>
+                  <span className="text-xs text-muted-foreground">
                     {progress.answered}/{progress.total}
                   </span>
                 </div>
 
                 {/* Section progress bar */}
-                <div className="w-full bg-gray-100 rounded-full h-1.5 mb-4">
+                <div className="w-full bg-muted rounded-full h-1.5 mb-4">
                   <div
-                    className="bg-sky-500 rounded-full h-1.5 transition-all duration-300"
+                    className="bg-primary rounded-full h-1.5 transition-all duration-300"
                     style={{ width: `${pct}%` }}
                   />
                 </div>
@@ -270,7 +270,7 @@ export default function ChecklistPage() {
                         key={item.field}
                         className="flex items-center justify-between gap-2"
                       >
-                        <span className="text-sm text-gray-700 flex-1">
+                        <span className="text-sm text-foreground flex-1">
                           {item.label}
                         </span>
                         <div className="flex gap-1.5 shrink-0">
@@ -280,7 +280,7 @@ export default function ChecklistPage() {
                             className={`inline-flex items-center justify-center h-8 w-8 rounded-lg text-xs font-medium transition-colors ${
                               val === true
                                 ? "bg-green-500 text-white"
-                                : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                                : "bg-muted text-muted-foreground hover:bg-muted/80"
                             }`}
                             title="Sim"
                           >
@@ -292,7 +292,7 @@ export default function ChecklistPage() {
                             className={`inline-flex items-center justify-center h-8 w-8 rounded-lg text-xs font-medium transition-colors ${
                               val === false
                                 ? "bg-red-500 text-white"
-                                : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                                : "bg-muted text-muted-foreground hover:bg-muted/80"
                             }`}
                             title="Não"
                           >
@@ -303,8 +303,8 @@ export default function ChecklistPage() {
                             onClick={() => setValue(section.key, item.field, null)}
                             className={`inline-flex items-center justify-center h-8 w-8 rounded-lg text-xs font-medium transition-colors ${
                               val === null && data[section.key][item.field] === null
-                                ? "bg-gray-100 text-gray-500"
-                                : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                                ? "bg-muted text-muted-foreground"
+                                : "bg-muted text-muted-foreground hover:bg-muted/80"
                             }`}
                             title="N/A"
                           >
@@ -325,7 +325,7 @@ export default function ChecklistPage() {
           <Button
             onClick={handleSave}
             disabled={saving}
-            className="bg-sky-600 hover:bg-sky-700 text-white px-10 py-3 text-base rounded-xl"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground px-10 py-3 text-base rounded-xl"
           >
             {saving ? (
               <>
