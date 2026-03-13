@@ -39,10 +39,10 @@ Responda APENAS com JSON válido, sem markdown, sem backticks, sem explicação:
 }`;
 
 export async function POST(request: NextRequest) {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return NextResponse.json(
-      { error: "GEMINI_API_KEY not configured" },
+      { error: "ANTHROPIC_API_KEY not configured" },
       { status: 500 }
     );
   }
@@ -64,32 +64,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          system_instruction: {
-            parts: [{ text: AI_SYSTEM_PROMPT }],
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 1024,
+        temperature: 0,
+        system: AI_SYSTEM_PROMPT,
+        messages: [
+          {
+            role: "user",
+            content: `Transcrição do áudio médico:\n\n"${transcription}"`,
           },
-          contents: [
-            {
-              role: "user",
-              parts: [
-                {
-                  text: `Transcrição do áudio médico:\n\n"${transcription}"`,
-                },
-              ],
-            },
-          ],
-          generationConfig: {
-            temperature: 0.1,
-            maxOutputTokens: 1000,
-          },
-        }),
-      }
-    );
+        ],
+      }),
+    });
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -101,8 +95,10 @@ export async function POST(request: NextRequest) {
 
     const data = await response.json();
     const rawText =
-      data.candidates?.[0]?.content?.parts
-        ?.map((p: { text?: string }) => p.text || "")
+      data.content
+        ?.map((block: { type: string; text?: string }) =>
+          block.type === "text" ? block.text || "" : ""
+        )
         .join("") || "";
     const clean = rawText.replace(/```json|```/g, "").trim();
     const parsed = JSON.parse(clean);
