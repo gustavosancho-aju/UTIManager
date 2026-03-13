@@ -19,35 +19,42 @@ export interface PatientSummary {
 export async function getDashboardData(): Promise<PatientSummary[]> {
   const supabase = createClient();
 
-  const { data: patients, error } = await supabase
-    .from("patients")
-    .select("*")
-    .order("bed", { ascending: true });
+  // Fetch all data in parallel (3 queries instead of 1 + 2N)
+  const [patientsRes, vitalsRes, reportsRes] = await Promise.all([
+    supabase.from("patients").select("*").order("bed", { ascending: true }),
+    supabase.from("vitals").select("*").order("date", { ascending: false }).order("time", { ascending: false }),
+    supabase.from("reports").select("*").order("created_at", { ascending: false }),
+  ]);
 
-  if (error || !patients) return [];
+  if (patientsRes.error || !patientsRes.data) {
+    console.error("Failed to fetch patients:", patientsRes.error?.message);
+    return [];
+  }
 
-  const summaries: PatientSummary[] = [];
+  const patients = patientsRes.data as Patient[];
+  const allVitals = (vitalsRes.data || []) as Vital[];
+  const allReports = (reportsRes.data || []) as Report[];
 
-  for (const patient of patients as Patient[]) {
-    // Fetch latest vitals
-    const { data: vitals } = await supabase
-      .from("vitals")
-      .select("*")
-      .eq("patient_id", patient.id)
-      .order("date", { ascending: false })
-      .order("time", { ascending: false })
-      .limit(1);
+  // Index by patient_id for O(1) lookup
+  const vitalsMap = new Map<string, Vital>();
+  for (const v of allVitals) {
+    if (!vitalsMap.has(v.patient_id)) {
+      vitalsMap.set(v.patient_id, v); // first = most recent (already sorted)
+    }
+  }
 
-    // Fetch latest report (for devices)
-    const { data: reports } = await supabase
-      .from("reports")
-      .select("*")
-      .eq("patient_id", patient.id)
-      .order("created_at", { ascending: false })
-      .limit(1);
+  const reportsMap = new Map<string, Report>();
+  for (const r of allReports) {
+    if (!reportsMap.has(r.patient_id)) {
+      reportsMap.set(r.patient_id, r);
+    }
+  }
 
-    const latestReport = reports?.[0] ? (reports[0] as Report) : null;
-    const latestVitals = vitals?.[0] ? (vitals[0] as Vital) : null;
+  const today = new Date();
+
+  return patients.map((patient) => {
+    const latestVitals = vitalsMap.get(patient.id) ?? null;
+    const latestReport = reportsMap.get(patient.id) ?? null;
 
     // Parse devices from latest report
     const reportDevices = latestReport?.devices as Record<string, { active?: boolean }> | null;
@@ -60,19 +67,18 @@ export async function getDashboardData(): Promise<PatientSummary[]> {
       sne: reportDevices?.sne?.active ?? false,
     };
 
-    // Calculate days admitted
+    // Calculate days admitted (with validation)
     const admDate = new Date(patient.admission_date);
-    const today = new Date();
-    const daysAdmitted = Math.max(1, Math.ceil((today.getTime() - admDate.getTime()) / (1000 * 60 * 60 * 24)));
+    const daysAdmitted = isNaN(admDate.getTime())
+      ? 1
+      : Math.max(1, Math.ceil((today.getTime() - admDate.getTime()) / (1000 * 60 * 60 * 24)));
 
-    summaries.push({
+    return {
       patient,
       latestVitals,
       latestReport,
       daysAdmitted,
       devices,
-    });
-  }
-
-  return summaries;
+    };
+  });
 }

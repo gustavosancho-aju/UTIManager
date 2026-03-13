@@ -20,6 +20,7 @@ import {
 } from "@/lib/supabase/patients";
 import type { Patient, Report } from "@/types/database";
 import { GenderBadge } from "@/components/shared";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -57,9 +58,6 @@ export default function PacienteDetailPage() {
   }, [id]);
 
   async function handleDelete() {
-    if (!window.confirm("Tem certeza que deseja excluir este paciente? Esta ação não pode ser desfeita.")) {
-      return;
-    }
     setDeleting(true);
     try {
       await deletePatient(id);
@@ -137,19 +135,27 @@ export default function PacienteDetailPage() {
               Editar
             </Button>
           </Link>
-          <Button
-            variant="outline"
-            className="gap-2 text-destructive border-destructive/20 hover:bg-destructive/10 hover:text-red-700"
-            onClick={handleDelete}
-            disabled={deleting}
-          >
-            {deleting ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Trash2 className="w-4 h-4" />
-            )}
-            Excluir
-          </Button>
+          <ConfirmDialog
+            trigger={
+              <Button
+                variant="outline"
+                className="gap-2 text-destructive border-destructive/20 hover:bg-destructive/10 hover:text-red-700"
+                disabled={deleting}
+              >
+                {deleting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4" />
+                )}
+                Excluir
+              </Button>
+            }
+            title="Excluir paciente"
+            description="Tem certeza que deseja excluir este paciente? Esta ação não pode ser desfeita. Todos os dados clínicos associados serão perdidos."
+            confirmLabel="Excluir"
+            onConfirm={handleDelete}
+            destructive
+          />
         </div>
       </div>
 

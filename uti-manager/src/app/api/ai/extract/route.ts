@@ -1,4 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+
+// --- Rate Limiting (in-memory, per-user) ---
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_MAX = 30; // requests
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(userId);
+
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(userId, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return true;
+  }
+
+  if (entry.count >= RATE_LIMIT_MAX) {
+    return false;
+  }
+
+  entry.count++;
+  return true;
+}
+
+// --- Sanitization ---
+function sanitizeTranscription(text: string): string {
+  return text
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "") // control chars
+    .trim();
+}
 
 const AI_SYSTEM_PROMPT = `Você é um assistente médico especializado em UTI. Receba a transcrição de um áudio médico e extraia dados estruturados.
 
@@ -39,10 +69,40 @@ Responda APENAS com JSON válido, sem markdown, sem backticks, sem explicação:
 }`;
 
 export async function POST(request: NextRequest) {
+  // --- 1. Auth check (explicit, not relying only on middleware) ---
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll() {
+          // Route handler — no cookie setting needed
+        },
+      },
+    }
+  );
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // --- 2. Rate limiting ---
+  if (!checkRateLimit(user.id)) {
+    return NextResponse.json(
+      { error: "Rate limit exceeded. Try again in 1 minute." },
+      { status: 429 }
+    );
+  }
+
+  // --- 3. API key check ---
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return NextResponse.json(
-      { error: "ANTHROPIC_API_KEY not configured" },
+      { error: "AI service not configured" },
       { status: 500 }
     );
   }
@@ -50,6 +110,7 @@ export async function POST(request: NextRequest) {
   try {
     const { transcription } = await request.json();
 
+    // --- 4. Input validation ---
     if (!transcription || typeof transcription !== "string") {
       return NextResponse.json(
         { error: "transcription is required" },
@@ -64,6 +125,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // --- 5. Sanitize input ---
+    const cleanTranscription = sanitizeTranscription(transcription);
+    if (cleanTranscription.length === 0) {
+      return NextResponse.json(
+        { error: "transcription is empty after sanitization" },
+        { status: 400 }
+      );
+    }
+
+    // --- 6. Call Claude API ---
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -79,17 +150,17 @@ export async function POST(request: NextRequest) {
         messages: [
           {
             role: "user",
-            content: `Transcrição do áudio médico:\n\n"${transcription}"`,
+            content: `Transcrição do áudio médico:\n\n"${cleanTranscription}"`,
           },
         ],
       }),
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
+      console.error("Anthropic API error:", response.status);
       return NextResponse.json(
-        { error: "AI API error", details: errorText },
-        { status: response.status }
+        { error: "AI service temporarily unavailable" },
+        { status: 502 }
       );
     }
 

@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { createPatient } from "@/lib/supabase/patients";
 import { createReport } from "@/lib/supabase/reports";
+import { createClient } from "@/lib/supabase/client";
 
 interface DeviceField {
   active: boolean;
@@ -111,6 +112,18 @@ export default function RevisarPage() {
   const [temp, setTemp] = useState("");
   const [sato2, setSato2] = useState("");
 
+  // Auth user
+  const [authorName, setAuthorName] = useState("Médico");
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user?.email) {
+        setAuthorName(data.user.user_metadata?.name || data.user.email.split("@")[0]);
+      }
+    });
+  }, []);
+
   useEffect(() => {
     const raw = sessionStorage.getItem("audio-review-data");
     if (!raw) {
@@ -119,7 +132,12 @@ export default function RevisarPage() {
     }
 
     try {
-      const { extracted, transcription: t, patientId: pid } = JSON.parse(raw);
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object" || !parsed.extracted || typeof parsed.transcription !== "string") {
+        router.replace("/audio");
+        return;
+      }
+      const { extracted, transcription: t, patientId: pid } = parsed;
       const data = extracted as ExtractedData;
 
       setTranscription(t || "");
@@ -203,7 +221,7 @@ export default function RevisarPage() {
           initials: initials || "---",
           name: initials || "Paciente",
           gender: (gender as "M" | "F") || "M",
-          birth_date: "2000-01-01",
+          birth_date: new Date().toISOString().split("T")[0],
           registration: `REG-${Date.now()}`,
           bed: bed || "0",
           unit: "UTI",
@@ -220,7 +238,7 @@ export default function RevisarPage() {
         patient_id: targetPatientId,
         date: now.toISOString().split("T")[0],
         time: now.toTimeString().slice(0, 5),
-        author: "Medico",
+        author: authorName,
         transcription,
         devices: JSON.parse(JSON.stringify(devices)),
         ventilation: JSON.parse(JSON.stringify({ mode: ventMode, fio2, peep })),

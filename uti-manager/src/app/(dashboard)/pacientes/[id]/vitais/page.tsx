@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import {
   getVitalsByPatient,
   createVital,
@@ -142,9 +143,6 @@ export default function VitaisPage() {
   }
 
   async function handleDelete(vitalId: string) {
-    if (!window.confirm("Tem certeza que deseja excluir este registro?")) {
-      return;
-    }
     try {
       await deleteVital(vitalId);
       setVitals((prev) => prev.filter((v) => v.id !== vitalId));
@@ -378,13 +376,21 @@ export default function VitaisPage() {
                           </span>
 
                           {/* Delete button */}
-                          <button
-                            onClick={() => handleDelete(vital.id)}
-                            className="text-muted-foreground hover:text-destructive transition-colors p-1 rounded-lg hover:bg-destructive/10"
+                          <ConfirmDialog
+                            trigger={
+                              <button
+                                className="text-muted-foreground hover:text-destructive transition-colors p-1 rounded-lg hover:bg-destructive/10"
+                                aria-label="Excluir registro de sinais vitais"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            }
                             title="Excluir registro"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                            description="Tem certeza que deseja excluir este registro de sinais vitais? Esta ação não pode ser desfeita."
+                            confirmLabel="Excluir"
+                            onConfirm={() => handleDelete(vital.id)}
+                            destructive
+                          />
                         </div>
 
                         {/* Vital indicators */}

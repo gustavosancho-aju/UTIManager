@@ -21,6 +21,7 @@ import {
 import { getPatients } from "@/lib/supabase/patients";
 import { createClient } from "@/lib/supabase/client";
 import { useTheme } from "@/hooks/useTheme";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import type { Patient } from "@/types/database";
 
 const navItems = [
@@ -187,6 +188,7 @@ export function Sidebar() {
         <div className="border-t border-sidebar-border p-3 space-y-1">
           <button
             onClick={toggleTheme}
+            aria-label={theme === "dark" ? "Alternar para modo claro" : "Alternar para modo escuro"}
             className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all duration-200"
           >
             {theme === "dark" ? (
@@ -196,13 +198,22 @@ export function Sidebar() {
             )}
             <span className="text-[13px] font-medium">{theme === "dark" ? "Modo Claro" : "Modo Escuro"}</span>
           </button>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200"
-          >
-            <LogOut className="w-[18px] h-[18px]" />
-            <span className="text-[13px] font-medium">Sair</span>
-          </button>
+          <ConfirmDialog
+            trigger={
+              <button
+                className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200"
+                aria-label="Encerrar sessão"
+              >
+                <LogOut className="w-[18px] h-[18px]" />
+                <span className="text-[13px] font-medium">Sair</span>
+              </button>
+            }
+            title="Encerrar sessão"
+            description="Deseja realmente sair do sistema? Você precisará fazer login novamente."
+            confirmLabel="Sair"
+            onConfirm={handleLogout}
+            destructive
+          />
         </div>
       )}
     </aside>
