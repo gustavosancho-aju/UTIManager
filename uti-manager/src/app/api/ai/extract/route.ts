@@ -30,42 +30,49 @@ function sanitizeTranscription(text: string): string {
     .trim();
 }
 
-const AI_SYSTEM_PROMPT = `Você é um assistente médico especializado em UTI. Receba a transcrição de um áudio médico e extraia dados estruturados.
+const AI_SYSTEM_PROMPT = `Você é um assistente médico especializado em UTI. Receba a transcrição de um áudio médico e extraia dados estruturados seguindo o roteiro de evolução UTI.
 
 REGRAS:
 - Extraia APENAS o que foi explicitamente mencionado
 - Use null para campos não mencionados
-- Para dispositivos, marque active: true/false baseado no contexto
 - PA deve estar no formato "XXX/XX" (converter "10 por 6" para "100/60")
-- Temperatura: número decimal
-- FC e SatO2: números inteiros
-- DVA: inclua droga e dose exatamente como mencionado (ml/h ou mcg/kg/min)
-- RASS: string (pode ser número ou "Coma", "Agitado", etc)
+- RASS: string (pode ser número como "-2" ou texto como "Coma", "Agitado")
 - bed: número do leito se mencionado
+- diasInternacao: número inteiro de dias
 
 Responda APENAS com JSON válido, sem markdown, sem backticks, sem explicação:
 {
   "gender": "M" ou "F" ou null,
   "initials": "XXX" ou null,
   "bed": "XX" ou null,
-  "admissionDate": "YYYY-MM-DD" ou null,
-  "admissionReason": "texto" ou null,
-  "mainDiagnosis": "texto" ou null,
-  "clinicalCondition": "texto" ou null,
-  "devices": {
-    "tot": { "active": bool, "details": "texto" },
-    "sondaVesical": { "active": bool, "details": "texto" },
-    "acessoVenoso": { "active": bool, "details": "texto" },
-    "sng": { "active": bool, "details": "texto" },
-    "sne": { "active": bool, "details": "texto" },
-    "dva": { "active": bool, "details": "texto" }
+  "diagnostico": "texto" ou null,
+  "diasInternacao": numero ou null,
+  "sedacao": {
+    "drogas": "texto" ou null,
+    "rass": "texto" ou null,
+    "objetivo": "manter" ou "desmamar" ou null
   },
-  "ventilation": { "mode": "texto", "fio2": "texto", "peep": "texto" },
-  "sedation": { "drugs": "texto", "rass": "texto" },
-  "antibiotics": "texto",
-  "hemodynamics": "texto",
-  "diuresis": "texto",
-  "vitalSigns": { "pa": "XXX/XX", "fc": numero, "temp": numero, "sato2": numero }
+  "ventilacao": {
+    "conforto": "confortavel" ou "desconfortavel" ou null,
+    "objetivo": "manter" ou "desmamar" ou null
+  },
+  "dieta": {
+    "via": "oral" ou "enteral" ou "parenteral" ou "zero" ou null
+  },
+  "hemodinamica": {
+    "pa": "XXX/XX" ou null,
+    "dva": "texto" ou null
+  },
+  "antibiotico": {
+    "nome": "texto" ou null,
+    "dias": numero ou null
+  },
+  "profilaxia": {
+    "ulceraPressao": true ou false ou null,
+    "lamg": true ou false ou null,
+    "trombose": true ou false ou null
+  },
+  "planoTerapeutico": "texto" ou null
 }`;
 
 export async function POST(request: NextRequest) {

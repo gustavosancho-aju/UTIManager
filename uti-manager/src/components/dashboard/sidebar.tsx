@@ -26,7 +26,7 @@ import type { Patient } from "@/types/database";
 
 const navItems = [
   { href: "/", label: "Dashboard", sublabel: "Visao geral da UTI", icon: LayoutDashboard },
-  { href: "/pacientes", label: "Pacientes", sublabel: "Gestao de leitos", icon: Users },
+  { href: "/pacientes", label: "Gestao de Pacientes", sublabel: "Leitos e evolucoes", icon: Users },
   { href: "/audio", label: "Novo Audio", sublabel: "Laudo por voz com IA", icon: Mic },
 ];
 

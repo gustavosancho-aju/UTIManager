@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UTI Manager - Preview das Mudancas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            background: '#0a0f1a',
+            foreground: '#e2e8f0',
+            card: '#111827',
+            border: '#1e293b',
+            primary: { DEFAULT: '#14b8a6', foreground: '#ffffff' },
+            muted: { DEFAULT: '#1e293b', foreground: '#94a3b8' },
+            destructive: { DEFAULT: '#ef4444', foreground: '#ffffff' },
+            sidebar: { DEFAULT: '#0f172a', foreground: '#e2e8f0', border: '#1e293b', accent: '#1e293b' },
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background: #0a0f1a; color: #e2e8f0; font-family: system-ui, -apple-system, sans-serif; }
+    .glass-card { background: rgba(17,24,39,0.8); backdrop-filter: blur(8px); }
+    .glow-teal { box-shadow: 0 0 20px rgba(20,184,166,0.3); }
+    .tab { cursor: pointer; padding: 12px 24px; border-bottom: 2px solid transparent; font-weight: 600; font-size: 14px; color: #94a3b8; transition: all 0.2s; }
+    .tab.active { color: #14b8a6; border-bottom-color: #14b8a6; }
+    .tab:hover { color: #e2e8f0; }
+    .page { display: none; }
+    .page.active { display: block; }
+    select, input, textarea { background: #1e293b; border: 1px solid #334155; color: #e2e8f0; border-radius: 8px; padding: 6px 12px; font-size: 14px; width: 100%; }
+    select:focus, input:focus, textarea:focus { outline: 2px solid #14b8a6; outline-offset: -1px; }
+    .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; background: rgba(20,184,166,0.1); color: #14b8a6; border: 1px solid rgba(20,184,166,0.2); }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <!-- Header -->
+  <div class="bg-sidebar border-b border-sidebar-border px-6 py-3">
+    <div class="flex items-center justify-between max-w-7xl mx-auto">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center glow-teal">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <div>
+          <div class="text-sm font-bold text-foreground tracking-tight">UTI Manager</div>
+          <div class="text-[10px] text-muted-foreground font-medium uppercase tracking-[0.15em]">Preview das Mudancas</div>
+        </div>
+      </div>
+      <span class="text-xs text-muted-foreground">Versao Preview - Nao funcional</span>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="border-b border-border bg-card/50 sticky top-0 z-10">
+    <div class="flex max-w-7xl mx-auto px-6">
+      <div class="tab active" onclick="showPage('gravacao')">1. Gravacao + Roteiro</div>
+      <div class="tab" onclick="showPage('revisao')">2. Revisao</div>
+      <div class="tab" onclick="showPage('paciente')">3. Detalhes Paciente</div>
+      <div class="tab" onclick="showPage('sidebar')">4. Sidebar</div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-6 py-8">
+
+    <!-- ==================== PAGE 1: GRAVACAO ==================== -->
+    <div id="page-gravacao" class="page active">
+      <h2 class="text-lg font-bold text-foreground mb-1">Pagina de Gravacao</h2>
+      <p class="text-sm text-muted-foreground mb-6">Layout lado-a-lado: gravacao + roteiro UTI</p>
+
+      <div class="grid grid-cols-1 lg:grid-cols-[1fr,320px] gap-6">
+        <!-- Roteiro (aparece primeiro em mobile) -->
+        <div class="order-first lg:order-last">
+          <div class="glass-card rounded-xl border border-border p-4 lg:sticky lg:top-20">
+            <div class="flex items-center gap-2 mb-4">
+              <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+              <h3 class="text-sm font-bold text-foreground">Roteiro UTI</h3>
+            </div>
+            <div class="space-y-2" id="roteiro-items"></div>
+          </div>
+        </div>
+
+        <!-- Area de gravacao -->
+        <div class="order-last lg:order-first">
+          <!-- Patient info -->
+          <div class="mb-6 glass-card rounded-xl border border-primary/20 p-4 text-center">
+            <p class="text-sm text-muted-foreground">Registrando para:</p>
+            <p class="text-base font-bold text-foreground">JMS — Leito 3</p>
+          </div>
+
+          <!-- Mode Toggle -->
+          <div class="flex items-center justify-center gap-2 mb-6">
+            <button class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-primary text-white shadow-md">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-8.464a5 5 0 000 7.072"/></svg>
+              Audio
+            </button>
+            <button class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-card text-muted-foreground border border-border">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8h18M3 16h18"/></svg>
+              Digitar
+            </button>
+          </div>
+
+          <!-- Mic button -->
+          <div class="flex flex-col items-center gap-4 mb-8">
+            <div class="w-32 h-32 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/30 hover:scale-105 transition-all cursor-pointer">
+              <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4M12 15a3 3 0 003-3V5a3 3 0 00-6 0v7a3 3 0 003 3z"/></svg>
+            </div>
+            <p class="text-sm text-muted-foreground">Toque para gravar</p>
+          </div>
+
+          <!-- Transcription area -->
+          <div class="glass-card rounded-xl border border-border p-4 mb-6">
+            <label class="text-sm font-semibold text-foreground mb-2 block">Transcricao</label>
+            <textarea rows="6" class="resize-none" placeholder="A transcricao aparecera aqui. Voce pode editar apos parar a gravacao."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== PAGE 2: REVISAO ==================== -->
+    <div id="page-revisao" class="page">
+      <h2 class="text-lg font-bold text-foreground mb-1">Pagina de Revisao</h2>
+      <p class="text-sm text-muted-foreground mb-6">Campos simplificados alinhados ao roteiro UTI</p>
+
+      <div class="max-w-3xl mx-auto">
+        <!-- Transcription collapsible -->
+        <div class="glass-card rounded-xl border border-border mb-6">
+          <button class="w-full flex items-center justify-between p-4" onclick="this.nextElementSibling.classList.toggle('hidden')">
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              <span class="text-sm font-semibold text-foreground">Transcricao Original</span>
+            </div>
+            <svg class="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          <div class="px-4 pb-4 hidden">
+            <p class="text-sm text-muted-foreground whitespace-pre-wrap bg-muted rounded-xl p-3">Paciente masculino, leito 3, iniciais JMS. Diagnostico TCE, 5 dias de internacao. Sedacao com Midazolam e Fentanil, RASS -2, manter. Ventilacao mecanica confortavel, manter. Dieta enteral. PA 120/80, Noradrenalina 0.1 mcg/kg/min. Meropenem D7. Profilaxia UP, LAMG e trombose. Plano: manter conduta, reavaliar desmame VM amanha.</p>
+          </div>
+        </div>
+
+        <!-- Identificacao -->
+        <div class="glass-card rounded-xl border border-border p-5 mb-4">
+          <h3 class="text-base font-bold text-foreground mb-4">Identificacao</h3>
+          <div class="grid grid-cols-3 gap-4">
+            <div>
+              <label class="text-xs font-medium text-muted-foreground mb-1 block">Leito</label>
+              <input value="3" />
+            </div>
+            <div>
+              <label class="text-xs font-medium text-muted-foreground mb-1 block">Iniciais</label>
+              <input value="JMS" />
+            </div>
+            <div>
+              <label class="text-xs font-medium text-muted-foreground mb-1 block">Sexo</label>
+              <select><option selected>Masculino</option><option>Feminino</option></select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Diagnostico -->
+        <div class="glass-card rounded-xl border border-border p-5 mb-4">
+          <h3 class="text-base font-bold text-foreground mb-4">Diagnostico</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-xs font-medium text-muted-foreground mb-1 block">Diagnostico</label>
+              <input value="TCE" placeholder="Ex: TCE, PNM" />
+            </div>
+            <div>
+              <label class="text-xs font-medium text-muted-foreground mb-1 block">Dias de Internacao</label>
+              <input value="5" placeholder="Ex: 5" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Sedacao -->
+        <div class="glass-card rounded-xl border border-border p-5 mb-4">
+          <h3 class="text-base font-bold text-foreground mb-4">Sedacao</h3>
+          <div class="grid grid-cols-3 gap-4">
+            <div>
+              <label class="text-xs font-medium text-muted-foreground mb-1 block">Drogas</label>
+              <input value="Midazolam, Fentanil" placeholder="Ex: Midazolam, Fentanil" />
+            </div>
+            <div>
+              <label class="text-xs font-medium text-muted-foreground mb-1 block">RASS</label>
+              <input value="-2" placeholder="Ex: -2" />
+            </div>
+            <div>
+              <label class="text-xs font-medium text-muted-foreground mb-1 block">Objetivo</label>
+              <select><option>--</option><option selected>Manter</option><option>Desmamar</option></select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ventilacao -->
+        <div class="glass-card rounded-xl border border-border p-5 mb-4">
+          <h3 class="text-base font-bold text-foreground mb-4">Ventilacao Mecanica</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-xs font-medium text-muted-foreground mb-1 block">Conforto</label>
+              <select><option>--</option><option selected>Confortavel</option><option>Desconfortavel</option></select>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-muted-foreground mb-1 block">Objetivo</label>
+              <select><option>--</option><option selected>Manter</option><option>Desmamar</option></select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dieta -->
+        <div class="glass-card rounded-xl border border-border p-5 mb-4">
+          <h3 class="text-base font-bold text-foreground mb-4">Dieta</h3>
+          <div>
+            <label class="text-xs font-medium text-muted-foreground mb-1 block">Via</label>
+            <select><option>--</option><option>Oral</option><option selected>Enteral</option><option>Parenteral</option><option>Zero (Jejum)</option></select>
+          </div>
+        </div>
+
+        <!-- Hemodinamica -->
+        <div class="glass-card rounded-xl border border-border p-5 mb-4">
+          <h3 class="text-base font-bold text-foreground mb-4">Hemodinamica</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-xs font-medium text-muted-foreground mb-1 block">PA</label>
+              <input value="120/80" placeholder="120/80" />
+            </div>
+            <div>
+              <label class="text-xs font-medium text-muted-foreground mb-1 block">Drogas Vasoativas</label>
+              <input value="Noradrenalina 0.1 mcg/kg/min" placeholder="Ex: Noradrenalina 0.1 mcg/kg/min" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Antibiotico -->
+        <div class="glass-card rounded-xl border border-border p-5 mb-4">
+          <h3 class="text-base font-bold text-foreground mb-4">Antibiotico</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-xs font-medium text-muted-foreground mb-1 block">Qual</label>
+              <input value="Meropenem" placeholder="Ex: Meropenem" />
+            </div>
+            <div>
+              <label class="text-xs font-medium text-muted-foreground mb-1 block">Dias</label>
+              <input value="7" placeholder="Ex: 7" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Profilaxia -->
+        <div class="glass-card rounded-xl border border-border p-5 mb-4">
+          <h3 class="text-base font-bold text-foreground mb-4">Profilaxia</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <label class="flex items-center gap-2 p-3 rounded-xl border border-border cursor-pointer hover:bg-muted/50 transition-colors">
+              <input type="checkbox" checked class="w-4 h-4 rounded accent-primary" />
+              <span class="text-sm font-medium text-foreground">Ulcera por Pressao</span>
+            </label>
+            <label class="flex items-center gap-2 p-3 rounded-xl border border-border cursor-pointer hover:bg-muted/50 transition-colors">
+              <input type="checkbox" checked class="w-4 h-4 rounded accent-primary" />
+              <span class="text-sm font-medium text-foreground">LAMG</span>
+            </label>
+            <label class="flex items-center gap-2 p-3 rounded-xl border border-border cursor-pointer hover:bg-muted/50 transition-colors">
+              <input type="checkbox" checked class="w-4 h-4 rounded accent-primary" />
+              <span class="text-sm font-medium text-foreground">Trombose</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Plano Terapeutico -->
+        <div class="glass-card rounded-xl border border-border p-5 mb-4">
+          <h3 class="text-base font-bold text-foreground mb-4">Plano Terapeutico</h3>
+          <textarea rows="3" class="resize-none" placeholder="Ex: Alta prevista para amanha...">Manter conduta, reavaliar desmame VM amanha.</textarea>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-3 mt-2 mb-8">
+          <button class="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border text-sm font-medium text-foreground hover:bg-muted/50 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Voltar
+          </button>
+          <button class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            Salvar Evolucao
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== PAGE 3: PACIENTE ==================== -->
+    <div id="page-paciente" class="page">
+      <h2 class="text-lg font-bold text-foreground mb-1">Detalhes do Paciente</h2>
+      <p class="text-sm text-muted-foreground mb-6">Identificacao + historico de evolucoes com dados do roteiro</p>
+
+      <div class="max-w-4xl">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-7">
+          <div>
+            <a href="#" class="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary mb-3">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+              Voltar para Gestao de Pacientes
+            </a>
+            <h3 class="text-2xl font-bold text-foreground">JMS</h3>
+            <p class="text-sm text-muted-foreground">Matricula: REG-1234567890</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button class="flex items-center gap-2 px-3 py-2 rounded-lg border border-border text-sm font-medium text-foreground hover:bg-muted/50">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4M12 15a3 3 0 003-3V5a3 3 0 00-6 0v7a3 3 0 003 3z"/></svg>
+              Nova Evolucao
+            </button>
+            <button class="flex items-center gap-2 px-3 py-2 rounded-lg border border-border text-sm font-medium text-foreground hover:bg-muted/50">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+              Editar
+            </button>
+          </div>
+        </div>
+
+        <!-- Identificacao -->
+        <div class="glass-card rounded-xl p-6 mb-6">
+          <h3 class="text-sm font-bold text-foreground uppercase tracking-wider mb-4">Identificacao</h3>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <p class="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">Leito</p>
+              <p class="text-lg font-bold text-primary flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h18M3 6h18M3 18h18"/></svg>
+                3
+              </p>
+            </div>
+            <div>
+              <p class="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">Iniciais</p>
+              <p class="text-lg font-bold text-foreground">JMS</p>
+            </div>
+            <div>
+              <p class="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">Genero</p>
+              <span class="badge">Masculino</span>
+            </div>
+            <div>
+              <p class="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">Data de Admissao</p>
+              <p class="text-sm font-medium text-foreground">27/03/2026</p>
+            </div>
+          </div>
+          <div class="mt-4">
+            <p class="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">Diagnostico Principal</p>
+            <p class="text-sm font-medium text-foreground">TCE</p>
+          </div>
+        </div>
+
+        <!-- Evolucoes -->
+        <h3 class="text-sm font-bold text-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
+          <svg class="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Historico de Evolucoes
+        </h3>
+
+        <!-- Report 1 (expanded) -->
+        <div class="glass-card rounded-xl border border-border mb-3">
+          <button class="w-full flex items-center justify-between p-4" onclick="this.nextElementSibling.classList.toggle('hidden')">
+            <div class="flex items-center gap-3">
+              <svg class="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              <div class="text-left">
+                <p class="text-sm font-semibold text-foreground">01/04/2026 - 14:30</p>
+                <p class="text-[11px] text-muted-foreground">Dr. Rafael | TCE</p>
+              </div>
+            </div>
+            <svg class="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+          </button>
+          <div class="px-4 pb-4 space-y-3">
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div>
+                <p class="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-0.5">Diagnostico</p>
+                <p class="text-sm font-medium text-foreground">TCE</p>
+              </div>
+              <div>
+                <p class="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-0.5">Dias Internacao</p>
+                <p class="text-sm font-medium text-foreground">D5</p>
+              </div>
+              <div>
+                <p class="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-0.5">Sedacao - Drogas</p>
+                <p class="text-sm font-medium text-foreground">Midazolam, Fentanil</p>
+              </div>
+              <div>
+                <p class="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-0.5">RASS</p>
+                <p class="text-sm font-medium text-foreground">-2</p>
+              </div>
+              <div>
+                <p class="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-0.5">Sedacao - Objetivo</p>
+                <p class="text-sm font-medium text-foreground capitalize">Manter</p>
+              </div>
+              <div>
+                <p class="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-0.5">VM - Conforto</p>
+                <p class="text-sm font-medium text-foreground capitalize">Confortavel</p>
+              </div>
+              <div>
+                <p class="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-0.5">VM - Objetivo</p>
+                <p class="text-sm font-medium text-foreground capitalize">Manter</p>
+              </div>
+              <div>
+                <p class="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-0.5">Dieta</p>
+                <p class="text-sm font-medium text-foreground capitalize">Enteral</p>
+              </div>
+              <div>
+                <p class="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-0.5">PA</p>
+                <p class="text-sm font-medium text-foreground">120/80</p>
+              </div>
+              <div>
+                <p class="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-0.5">DVA</p>
+                <p class="text-sm font-medium text-foreground">Noradrenalina 0.1 mcg/kg/min</p>
+              </div>
+              <div>
+                <p class="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-0.5">Antibiotico</p>
+                <p class="text-sm font-medium text-foreground">Meropenem (D7)</p>
+              </div>
+            </div>
+            <div>
+              <p class="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">Profilaxia</p>
+              <div class="flex gap-2 flex-wrap">
+                <span class="badge">UP</span>
+                <span class="badge">LAMG</span>
+                <span class="badge">Trombose</span>
+              </div>
+            </div>
+            <div>
+              <p class="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">Plano Terapeutico</p>
+              <p class="text-sm text-foreground">Manter conduta, reavaliar desmame VM amanha.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Report 2 (collapsed) -->
+        <div class="glass-card rounded-xl border border-border mb-3">
+          <button class="w-full flex items-center justify-between p-4" onclick="this.nextElementSibling.classList.toggle('hidden')">
+            <div class="flex items-center gap-3">
+              <svg class="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              <div class="text-left">
+                <p class="text-sm font-semibold text-foreground">31/03/2026 - 08:15</p>
+                <p class="text-[11px] text-muted-foreground">Dr. Rafael | TCE</p>
+              </div>
+            </div>
+            <svg class="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          <div class="px-4 pb-4 space-y-3 hidden">
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div>
+                <p class="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-0.5">Diagnostico</p>
+                <p class="text-sm font-medium text-foreground">TCE</p>
+              </div>
+              <div>
+                <p class="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-0.5">Dias Internacao</p>
+                <p class="text-sm font-medium text-foreground">D4</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== PAGE 4: SIDEBAR ==================== -->
+    <div id="page-sidebar" class="page">
+      <h2 class="text-lg font-bold text-foreground mb-1">Sidebar Atualizada</h2>
+      <p class="text-sm text-muted-foreground mb-6">"Pacientes" renomeado para "Gestao de Pacientes"</p>
+
+      <div class="flex gap-8">
+        <!-- Sidebar mock -->
+        <div class="w-[280px] bg-sidebar border border-sidebar-border rounded-xl overflow-hidden shrink-0">
+          <!-- Logo -->
+          <div class="flex items-center gap-3 px-5 h-16 border-b border-sidebar-border">
+            <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center glow-teal">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            </div>
+            <div>
+              <div class="text-sm font-bold text-foreground tracking-tight">UTI Manager</div>
+              <div class="text-[10px] text-muted-foreground font-medium uppercase tracking-[0.15em]">HUSE &bull; Sergipe</div>
+            </div>
+          </div>
+
+          <nav class="py-4 px-3 space-y-1">
+            <div class="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.15em] px-3 mb-2">Menu</div>
+
+            <!-- Dashboard -->
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-all">
+              <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+              <div>
+                <div class="text-[13px] font-semibold text-foreground leading-tight">Dashboard</div>
+                <div class="text-[11px] text-muted-foreground leading-tight mt-0.5">Visao geral da UTI</div>
+              </div>
+            </a>
+
+            <!-- Gestao de Pacientes (RENAMED) -->
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 text-primary transition-all">
+              <svg class="w-[18px] h-[18px] text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+              <div>
+                <div class="text-[13px] font-semibold text-primary leading-tight">Gestao de Pacientes</div>
+                <div class="text-[11px] text-muted-foreground leading-tight mt-0.5">Leitos e evolucoes</div>
+              </div>
+            </a>
+
+            <!-- Novo Audio -->
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-all">
+              <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4M12 15a3 3 0 003-3V5a3 3 0 00-6 0v7a3 3 0 003 3z"/></svg>
+              <div>
+                <div class="text-[13px] font-semibold text-foreground leading-tight">Novo Audio</div>
+                <div class="text-[11px] text-muted-foreground leading-tight mt-0.5">Laudo por voz com IA</div>
+              </div>
+            </a>
+          </nav>
+        </div>
+
+        <!-- Change highlight -->
+        <div class="flex-1">
+          <div class="glass-card rounded-xl border border-primary/30 p-6">
+            <h3 class="text-base font-bold text-primary mb-3">Mudanca na Sidebar</h3>
+            <div class="space-y-3">
+              <div class="flex items-center gap-3">
+                <span class="text-xs font-mono bg-red-500/10 text-red-400 px-2 py-1 rounded border border-red-500/20">ANTES</span>
+                <span class="text-sm text-muted-foreground line-through">Pacientes</span>
+                <span class="text-[11px] text-muted-foreground">sublabel: "Gestao de leitos"</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="text-xs font-mono bg-green-500/10 text-green-400 px-2 py-1 rounded border border-green-500/20">DEPOIS</span>
+                <span class="text-sm text-foreground font-semibold">Gestao de Pacientes</span>
+                <span class="text-[11px] text-muted-foreground">sublabel: "Leitos e evolucoes"</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Populate roteiro items
+    const roteiroItems = [
+      { num: 1, label: "Diagnostico", hint: "TCE, PNM, Sepse..." },
+      { num: 2, label: "Dias de Internacao", hint: "Quantos dias" },
+      { num: 3, label: "Sedacao", hint: "Drogas / RASS / Manter ou Desmamar" },
+      { num: 4, label: "Ventilacao Mecanica", hint: "Confortavel? / Manter ou Desmamar" },
+      { num: 5, label: "Dieta", hint: "Oral / Enteral / Parenteral / Zero" },
+      { num: 6, label: "Hemodinamica", hint: "PA e Drogas Vasoativas" },
+      { num: 7, label: "Antibiotico", hint: "Qual e quantos dias" },
+      { num: 8, label: "Profilaxia", hint: "UP / LAMG / Trombose" },
+      { num: 9, label: "Plano Terapeutico", hint: "Alta? / Mudancas no tratamento" },
+    ];
+
+    const container = document.getElementById('roteiro-items');
+    roteiroItems.forEach(item => {
+      container.innerHTML += `
+        <div class="flex items-start gap-3 p-2.5 rounded-lg" style="background:rgba(30,41,59,0.5);border:1px solid rgba(30,41,59,0.8)">
+          <span class="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-bold" style="background:rgba(20,184,166,0.1);color:#14b8a6">${item.num}</span>
+          <div>
+            <p class="text-[13px] font-semibold text-foreground leading-tight">${item.label}</p>
+            <p class="text-[11px] text-muted-foreground leading-tight mt-0.5">${item.hint}</p>
+          </div>
+        </div>
+      `;
+    });
+
+    // Tab navigation
+    function showPage(name) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('page-' + name).classList.add('active');
+      event.target.classList.add('active');
+    }
+  </script>
+</body>
+</html>

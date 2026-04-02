@@ -11,8 +11,9 @@ import {
   Bed,
   Calendar,
   FileText,
-  ClipboardCheck,
-  HeartPulse,
+  Mic,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import {
   getPatientWithReports,
@@ -22,14 +23,161 @@ import type { Patient, Report } from "@/types/database";
 import { GenderBadge } from "@/components/shared";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+
+// Helper to safely parse JSON fields from report
+function safeJson(val: unknown): Record<string, unknown> {
+  if (val && typeof val === "object" && !Array.isArray(val)) return val as Record<string, unknown>;
+  if (typeof val === "string") {
+    try { return JSON.parse(val); } catch { return {}; }
+  }
+  return {};
+}
+
+function ReportCard({ report }: { report: Report }) {
+  const [open, setOpen] = useState(false);
+
+  const sedation = safeJson(report.sedation);
+  const ventilation = safeJson(report.ventilation);
+  const devices = safeJson(report.devices);
+  const vitalSigns = safeJson(report.vital_signs);
+
+  const sedDrogas = String(sedation.drogas || "");
+  const sedRass = String(sedation.rass || "");
+  const sedObj = String(sedation.objetivo || "");
+  const ventConforto = String(ventilation.conforto || "");
+  const ventObj = String(ventilation.objetivo || "");
+
+  const profilaxia = (devices.profilaxia as Record<string, boolean>) || {};
+  const dieta = (devices.dieta as Record<string, string>) || {};
+  const hemodinamica = (vitalSigns.hemodinamica as Record<string, string>) || {};
+  const antibiotico = (vitalSigns.antibiotico as Record<string, unknown>) || {};
+  const plano = String(vitalSigns.planoTerapeutico || "");
+
+  // Fallback: try hemodynamics field directly
+  let hemoPA = hemodinamica.pa || "";
+  let hemoDVA = hemodinamica.dva || "";
+  if (!hemoPA && report.hemodynamics) {
+    try {
+      const h = JSON.parse(report.hemodynamics);
+      hemoPA = h.pa || "";
+      hemoDVA = h.dva || "";
+    } catch {
+      // legacy string format
+    }
+  }
+
+  return (
+    <div className="glass-card rounded-xl border border-border mb-3">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between p-4"
+      >
+        <div className="flex items-center gap-3">
+          <FileText className="w-4 h-4 text-muted-foreground" />
+          <div className="text-left">
+            <p className="text-sm font-semibold text-foreground">
+              {new Date(report.date).toLocaleDateString("pt-BR")} - {report.time}
+            </p>
+            <p className="text-[11px] text-muted-foreground">
+              {report.author} {report.clinical_condition ? `| ${report.clinical_condition}` : ""}
+            </p>
+          </div>
+        </div>
+        {open ? (
+          <ChevronUp className="w-4 h-4 text-muted-foreground" />
+        ) : (
+          <ChevronDown className="w-4 h-4 text-muted-foreground" />
+        )}
+      </button>
+
+      {open && (
+        <div className="px-4 pb-4 space-y-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {report.clinical_condition && (
+              <DataItem label="Diagnostico" value={report.clinical_condition} />
+            )}
+            {report.diuresis && (
+              <DataItem label="Dias Internacao" value={`D${report.diuresis}`} />
+            )}
+            {sedDrogas && (
+              <DataItem label="Sedacao - Drogas" value={sedDrogas} />
+            )}
+            {sedRass && (
+              <DataItem label="RASS" value={sedRass} />
+            )}
+            {sedObj && (
+              <DataItem label="Sedacao - Objetivo" value={sedObj} />
+            )}
+            {ventConforto && (
+              <DataItem label="VM - Conforto" value={ventConforto} />
+            )}
+            {ventObj && (
+              <DataItem label="VM - Objetivo" value={ventObj} />
+            )}
+            {dieta.via && (
+              <DataItem label="Dieta" value={String(dieta.via)} />
+            )}
+            {hemoPA && (
+              <DataItem label="PA" value={hemoPA} />
+            )}
+            {hemoDVA && (
+              <DataItem label="DVA" value={hemoDVA} />
+            )}
+            {report.antibiotics && (
+              <DataItem label="Antibiotico" value={report.antibiotics} />
+            )}
+            {(antibiotico.dias != null && antibiotico.dias !== "") && (
+              <DataItem label="ATB Dias" value={`D${antibiotico.dias}`} />
+            )}
+          </div>
+
+          {/* Profilaxia */}
+          {(profilaxia.ulceraPressao || profilaxia.lamg || profilaxia.trombose) && (
+            <div>
+              <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">
+                Profilaxia
+              </p>
+              <div className="flex gap-2 flex-wrap">
+                {profilaxia.ulceraPressao && <Badge>UP</Badge>}
+                {profilaxia.lamg && <Badge>LAMG</Badge>}
+                {profilaxia.trombose && <Badge>Trombose</Badge>}
+              </div>
+            </div>
+          )}
+
+          {/* Plano */}
+          {plano && (
+            <div>
+              <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">
+                Plano Terapeutico
+              </p>
+              <p className="text-sm text-foreground">{plano}</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DataItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-0.5">
+        {label}
+      </p>
+      <p className="text-sm font-medium text-foreground capitalize">{value}</p>
+    </div>
+  );
+}
+
+function Badge({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-primary/10 text-primary border border-primary/20">
+      {children}
+    </span>
+  );
+}
 
 export default function PacienteDetailPage() {
   const params = useParams();
@@ -87,11 +235,11 @@ export default function PacienteDetailPage() {
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary mb-4"
         >
           <ArrowLeft className="w-4 h-4" />
-          Voltar para Pacientes
+          Voltar para Gestao de Pacientes
         </Link>
         <div className="glass-card rounded-xl bg-destructive/10 border border-destructive/20 p-6 text-center">
           <p className="text-sm text-destructive">
-            {error ?? "Paciente não encontrado"}
+            {error ?? "Paciente nao encontrado"}
           </p>
         </div>
       </div>
@@ -107,26 +255,20 @@ export default function PacienteDetailPage() {
             className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary mb-3"
           >
             <ArrowLeft className="w-4 h-4" />
-            Voltar para Pacientes
+            Voltar para Gestao de Pacientes
           </Link>
           <h1 className="text-2xl font-bold font-display text-foreground">
             {patient.name}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Matrícula: {patient.registration}
+            Matricula: {patient.registration}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Link href={`/pacientes/${id}/vitais`}>
+          <Link href={`/audio/gravar?paciente=${id}`}>
             <Button variant="outline" className="gap-2">
-              <HeartPulse className="w-4 h-4" />
-              Sinais Vitais
-            </Button>
-          </Link>
-          <Link href={`/pacientes/${id}/checklist`}>
-            <Button variant="outline" className="gap-2">
-              <ClipboardCheck className="w-4 h-4" />
-              Checklist
+              <Mic className="w-4 h-4" />
+              Nova Evolucao
             </Button>
           </Link>
           <Link href={`/pacientes/${id}/editar`}>
@@ -151,7 +293,7 @@ export default function PacienteDetailPage() {
               </Button>
             }
             title="Excluir paciente"
-            description="Tem certeza que deseja excluir este paciente? Esta ação não pode ser desfeita. Todos os dados clínicos associados serão perdidos."
+            description="Tem certeza que deseja excluir este paciente? Esta acao nao pode ser desfeita. Todos os dados clinicos associados serao perdidos."
             confirmLabel="Excluir"
             onConfirm={handleDelete}
             destructive
@@ -159,10 +301,10 @@ export default function PacienteDetailPage() {
         </div>
       </div>
 
-      {/* Dados do Paciente */}
+      {/* Identificacao */}
       <div className="glass-card rounded-xl p-6 mb-6">
         <h2 className="text-sm font-bold text-foreground uppercase tracking-wider mb-4">
-          Identificação
+          Identificacao
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
@@ -184,114 +326,56 @@ export default function PacienteDetailPage() {
           </div>
           <div>
             <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">
-              Gênero
+              Genero
             </p>
             <GenderBadge gender={patient.gender} />
           </div>
           <div>
             <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">
-              Data de Nascimento
-            </p>
-            <p className="text-sm font-medium text-foreground">
-              {new Date(patient.birth_date).toLocaleDateString("pt-BR")}
-            </p>
-          </div>
-          <div>
-            <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">
-              Unidade
-            </p>
-            <p className="text-sm font-medium text-foreground">
-              {patient.unit}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Dados Clínicos */}
-      <div className="glass-card rounded-xl p-6 mb-6">
-        <h2 className="text-sm font-bold text-foreground uppercase tracking-wider mb-4">
-          Dados Clínicos
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">
-              Data de Admissão
+              Data de Admissao
             </p>
             <p className="text-sm font-medium text-foreground flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
               {new Date(patient.admission_date).toLocaleDateString("pt-BR")}
             </p>
           </div>
-          <div>
+        </div>
+        {patient.main_diagnosis && (
+          <div className="mt-4">
             <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">
-              Status Clínico
-            </p>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
-              {patient.clinical_status}
-            </span>
-          </div>
-          <div className="md:col-span-2">
-            <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">
-              Motivo da Internação
-            </p>
-            <p className="text-sm text-foreground">
-              {patient.admission_reason}
-            </p>
-          </div>
-          <div className="md:col-span-2">
-            <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">
-              Diagnóstico Principal
+              Diagnostico Principal
             </p>
             <p className="text-sm font-medium text-foreground">
               {patient.main_diagnosis}
             </p>
           </div>
-        </div>
+        )}
       </div>
 
-      {/* Evoluções */}
-      <div className="glass-card rounded-xl p-6">
+      {/* Evolucoes */}
+      <div className="mb-6">
         <h2 className="text-sm font-bold text-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
           <FileText className="w-4 h-4 text-muted-foreground" />
-          Evoluções
+          Historico de Evolucoes
         </h2>
 
         {reports.length === 0 ? (
-          <div className="text-center py-8">
+          <div className="glass-card rounded-xl p-8 text-center">
             <FileText className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">
-              Nenhuma evolução registrada para este paciente.
+            <p className="text-sm text-muted-foreground mb-4">
+              Nenhuma evolucao registrada para este paciente.
             </p>
+            <Link href={`/audio/gravar?paciente=${id}`}>
+              <Button className="gap-2">
+                <Mic className="w-4 h-4" />
+                Registrar Primeira Evolucao
+              </Button>
+            </Link>
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="font-semibold">Data</TableHead>
-                <TableHead className="font-semibold">Hora</TableHead>
-                <TableHead className="font-semibold">Autor</TableHead>
-                <TableHead className="font-semibold">
-                  Condição Clínica
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {reports.map((report) => (
-                <TableRow key={report.id}>
-                  <TableCell className="text-sm">
-                    {new Date(report.date).toLocaleDateString("pt-BR")}
-                  </TableCell>
-                  <TableCell className="text-sm">{report.time}</TableCell>
-                  <TableCell className="text-sm font-medium">
-                    {report.author}
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground max-w-[300px] truncate">
-                    {report.clinical_condition}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          reports.map((report) => (
+            <ReportCard key={report.id} report={report} />
+          ))
         )}
       </div>
     </div>

@@ -17,57 +17,39 @@ import { createPatient } from "@/lib/supabase/patients";
 import { createReport } from "@/lib/supabase/reports";
 import { createClient } from "@/lib/supabase/client";
 
-interface DeviceField {
-  active: boolean;
-  details: string;
-}
-
 interface ExtractedData {
   gender: string | null;
   initials: string | null;
   bed: string | null;
-  admissionDate: string | null;
-  admissionReason: string | null;
-  mainDiagnosis: string | null;
-  clinicalCondition: string | null;
-  devices: {
-    tot: DeviceField;
-    sondaVesical: DeviceField;
-    acessoVenoso: DeviceField;
-    sng: DeviceField;
-    sne: DeviceField;
-    dva: DeviceField;
+  diagnostico: string | null;
+  diasInternacao: number | null;
+  sedacao: {
+    drogas: string | null;
+    rass: string | null;
+    objetivo: string | null;
   };
-  ventilation: { mode: string; fio2: string; peep: string };
-  sedation: { drugs: string; rass: string };
-  antibiotics: string | null;
-  hemodynamics: string | null;
-  diuresis: string | null;
-  vitalSigns: {
+  ventilacao: {
+    conforto: string | null;
+    objetivo: string | null;
+  };
+  dieta: {
+    via: string | null;
+  };
+  hemodinamica: {
     pa: string | null;
-    fc: number | null;
-    temp: number | null;
-    sato2: number | null;
+    dva: string | null;
   };
+  antibiotico: {
+    nome: string | null;
+    dias: number | null;
+  };
+  profilaxia: {
+    ulceraPressao: boolean | null;
+    lamg: boolean | null;
+    trombose: boolean | null;
+  };
+  planoTerapeutico: string | null;
 }
-
-const DEVICE_LABELS: Record<string, string> = {
-  tot: "TOT (Tubo Orotraqueal)",
-  sondaVesical: "Sonda Vesical",
-  acessoVenoso: "Acesso Venoso",
-  sng: "SNG (Sonda Nasogastrica)",
-  sne: "SNE (Sonda Nasoenteral)",
-  dva: "DVA (Droga Vasoativa)",
-};
-
-const DEFAULT_DEVICES: ExtractedData["devices"] = {
-  tot: { active: false, details: "" },
-  sondaVesical: { active: false, details: "" },
-  acessoVenoso: { active: false, details: "" },
-  sng: { active: false, details: "" },
-  sne: { active: false, details: "" },
-  dva: { active: false, details: "" },
-};
 
 export default function RevisarPage() {
   const router = useRouter();
@@ -84,36 +66,40 @@ export default function RevisarPage() {
   const [initials, setInitials] = useState("");
   const [gender, setGender] = useState("M");
 
-  // Clinical
-  const [clinicalCondition, setClinicalCondition] = useState("");
-  const [mainDiagnosis, setMainDiagnosis] = useState("");
+  // Roteiro fields
+  const [diagnostico, setDiagnostico] = useState("");
+  const [diasInternacao, setDiasInternacao] = useState("");
 
-  // Devices
-  const [devices, setDevices] =
-    useState<ExtractedData["devices"]>(DEFAULT_DEVICES);
-
-  // Ventilation
-  const [ventMode, setVentMode] = useState("");
-  const [fio2, setFio2] = useState("");
-  const [peep, setPeep] = useState("");
-
-  // Sedation
-  const [sedDrugs, setSedDrugs] = useState("");
+  // Sedacao
+  const [sedDrogas, setSedDrogas] = useState("");
   const [rass, setRass] = useState("");
+  const [sedObjetivo, setSedObjetivo] = useState("");
 
-  // Others
-  const [antibiotics, setAntibiotics] = useState("");
-  const [hemodynamics, setHemodynamics] = useState("");
-  const [diuresis, setDiuresis] = useState("");
+  // Ventilacao
+  const [ventConforto, setVentConforto] = useState("");
+  const [ventObjetivo, setVentObjetivo] = useState("");
 
-  // Vitals
+  // Dieta
+  const [dietaVia, setDietaVia] = useState("");
+
+  // Hemodinamica
   const [pa, setPa] = useState("");
-  const [fc, setFc] = useState("");
-  const [temp, setTemp] = useState("");
-  const [sato2, setSato2] = useState("");
+  const [dva, setDva] = useState("");
+
+  // Antibiotico
+  const [atbNome, setAtbNome] = useState("");
+  const [atbDias, setAtbDias] = useState("");
+
+  // Profilaxia
+  const [profUlcera, setProfUlcera] = useState(false);
+  const [profLamg, setProfLamg] = useState(false);
+  const [profTrombose, setProfTrombose] = useState(false);
+
+  // Plano
+  const [plano, setPlano] = useState("");
 
   // Auth user
-  const [authorName, setAuthorName] = useState("Médico");
+  const [authorName, setAuthorName] = useState("Medico");
 
   useEffect(() => {
     const supabase = createClient();
@@ -148,64 +134,53 @@ export default function RevisarPage() {
       setInitials(data.initials || "");
       setGender(data.gender || "M");
 
-      // Clinical
-      setClinicalCondition(data.clinicalCondition || "");
-      setMainDiagnosis(data.mainDiagnosis || "");
+      // Roteiro
+      setDiagnostico(data.diagnostico || "");
+      setDiasInternacao(data.diasInternacao?.toString() || "");
 
-      // Devices
-      if (data.devices) {
-        setDevices({
-          tot: data.devices.tot || DEFAULT_DEVICES.tot,
-          sondaVesical:
-            data.devices.sondaVesical || DEFAULT_DEVICES.sondaVesical,
-          acessoVenoso:
-            data.devices.acessoVenoso || DEFAULT_DEVICES.acessoVenoso,
-          sng: data.devices.sng || DEFAULT_DEVICES.sng,
-          sne: data.devices.sne || DEFAULT_DEVICES.sne,
-          dva: data.devices.dva || DEFAULT_DEVICES.dva,
-        });
+      // Sedacao
+      if (data.sedacao) {
+        setSedDrogas(data.sedacao.drogas || "");
+        setRass(data.sedacao.rass || "");
+        setSedObjetivo(data.sedacao.objetivo || "");
       }
 
-      // Ventilation
-      if (data.ventilation) {
-        setVentMode(data.ventilation.mode || "");
-        setFio2(data.ventilation.fio2 || "");
-        setPeep(data.ventilation.peep || "");
+      // Ventilacao
+      if (data.ventilacao) {
+        setVentConforto(data.ventilacao.conforto || "");
+        setVentObjetivo(data.ventilacao.objetivo || "");
       }
 
-      // Sedation
-      if (data.sedation) {
-        setSedDrugs(data.sedation.drugs || "");
-        setRass(data.sedation.rass || "");
+      // Dieta
+      if (data.dieta) {
+        setDietaVia(data.dieta.via || "");
       }
 
-      // Others
-      setAntibiotics(data.antibiotics || "");
-      setHemodynamics(data.hemodynamics || "");
-      setDiuresis(data.diuresis || "");
-
-      // Vitals
-      if (data.vitalSigns) {
-        setPa(data.vitalSigns.pa || "");
-        setFc(data.vitalSigns.fc?.toString() || "");
-        setTemp(data.vitalSigns.temp?.toString() || "");
-        setSato2(data.vitalSigns.sato2?.toString() || "");
+      // Hemodinamica
+      if (data.hemodinamica) {
+        setPa(data.hemodinamica.pa || "");
+        setDva(data.hemodinamica.dva || "");
       }
+
+      // Antibiotico
+      if (data.antibiotico) {
+        setAtbNome(data.antibiotico.nome || "");
+        setAtbDias(data.antibiotico.dias?.toString() || "");
+      }
+
+      // Profilaxia
+      if (data.profilaxia) {
+        setProfUlcera(data.profilaxia.ulceraPressao ?? false);
+        setProfLamg(data.profilaxia.lamg ?? false);
+        setProfTrombose(data.profilaxia.trombose ?? false);
+      }
+
+      // Plano
+      setPlano(data.planoTerapeutico || "");
     } catch {
       router.replace("/audio");
     }
   }, [router]);
-
-  function updateDevice(
-    key: keyof ExtractedData["devices"],
-    field: "active" | "details",
-    value: boolean | string
-  ) {
-    setDevices((prev) => ({
-      ...prev,
-      [key]: { ...prev[key], [field]: value },
-    }));
-  }
 
   async function handleSave() {
     setSaving(true);
@@ -226,8 +201,8 @@ export default function RevisarPage() {
           bed: bed || "0",
           unit: "UTI",
           admission_date: now.toISOString().split("T")[0],
-          admission_reason: mainDiagnosis || "A definir",
-          main_diagnosis: mainDiagnosis || "A definir",
+          admission_reason: diagnostico || "A definir",
+          main_diagnosis: diagnostico || "A definir",
           clinical_status: "Internado",
         });
         targetPatientId = patient.id;
@@ -240,18 +215,28 @@ export default function RevisarPage() {
         time: now.toTimeString().slice(0, 5),
         author: authorName,
         transcription,
-        devices: JSON.parse(JSON.stringify(devices)),
-        ventilation: JSON.parse(JSON.stringify({ mode: ventMode, fio2, peep })),
-        sedation: JSON.parse(JSON.stringify({ drugs: sedDrugs, rass })),
-        antibiotics: antibiotics || "",
-        hemodynamics: hemodynamics || "",
-        clinical_condition: clinicalCondition || "",
-        diuresis: diuresis || "",
+        // Reutilizar campos JSON existentes para os dados do roteiro
+        devices: JSON.parse(JSON.stringify({
+          profilaxia: { ulceraPressao: profUlcera, lamg: profLamg, trombose: profTrombose },
+          dieta: { via: dietaVia },
+        })),
+        ventilation: JSON.parse(JSON.stringify({
+          conforto: ventConforto,
+          objetivo: ventObjetivo,
+        })),
+        sedation: JSON.parse(JSON.stringify({
+          drogas: sedDrogas,
+          rass,
+          objetivo: sedObjetivo,
+        })),
+        antibiotics: atbNome ? `${atbNome}${atbDias ? ` (D${atbDias})` : ""}` : "",
+        hemodynamics: JSON.stringify({ pa, dva }),
+        clinical_condition: diagnostico || "",
+        diuresis: diasInternacao || "",
         vital_signs: JSON.parse(JSON.stringify({
-          pa: pa || null,
-          fc: fc ? Number(fc) : null,
-          temp: temp ? Number(temp) : null,
-          sato2: sato2 ? Number(sato2) : null,
+          planoTerapeutico: plano,
+          hemodinamica: { pa, dva },
+          antibiotico: { nome: atbNome, dias: atbDias ? Number(atbDias) : null },
         })),
       });
 
@@ -329,126 +314,148 @@ export default function RevisarPage() {
         </Section>
       )}
 
-      {/* Section 2 - Clinical Condition */}
-      <Section title="Condicao Clinica">
-        <div className="space-y-4">
+      {/* Section 2 - Diagnostico */}
+      <Section title="Diagnostico">
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="Diagnostico" value={diagnostico} onChange={setDiagnostico} placeholder="Ex: TCE, PNM" />
+          <Field label="Dias de Internacao" value={diasInternacao} onChange={setDiasInternacao} placeholder="Ex: 5" />
+        </div>
+      </Section>
+
+      {/* Section 3 - Sedacao */}
+      <Section title="Sedacao">
+        <div className="grid grid-cols-3 gap-4">
+          <Field label="Drogas" value={sedDrogas} onChange={setSedDrogas} placeholder="Ex: Midazolam, Fentanil" />
+          <Field label="RASS" value={rass} onChange={setRass} placeholder="Ex: -2" />
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1 block">
-              Condicao Clinica
+              Objetivo
             </label>
-            <Textarea
-              value={clinicalCondition}
-              onChange={(e) => setClinicalCondition(e.target.value)}
-              rows={3}
-              className="resize-none"
-            />
+            <select
+              value={sedObjetivo}
+              onChange={(e) => setSedObjetivo(e.target.value)}
+              className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
+            >
+              <option value="">--</option>
+              <option value="manter">Manter</option>
+              <option value="desmamar">Desmamar</option>
+            </select>
           </div>
-          {isNewPatient && (
-            <Field
-              label="Diagnostico Principal"
-              value={mainDiagnosis}
-              onChange={setMainDiagnosis}
-            />
-          )}
         </div>
       </Section>
 
-      {/* Section 3 - Devices */}
-      <Section title="Dispositivos">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {(
-            Object.keys(DEVICE_LABELS) as Array<
-              keyof ExtractedData["devices"]
-            >
-          ).map((key) => (
-            <div
-              key={key}
-              className={`rounded-xl border p-3 transition-colors ${
-                devices[key].active
-                  ? "border-primary/20 bg-primary/5"
-                  : "border-border"
-              }`}
-            >
-              <label className="flex items-center gap-2 mb-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={devices[key].active}
-                  onChange={(e) =>
-                    updateDevice(key, "active", e.target.checked)
-                  }
-                  className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
-                />
-                <span className="text-sm font-medium text-foreground">
-                  {DEVICE_LABELS[key]}
-                </span>
-              </label>
-              {devices[key].active && (
-                <Input
-                  value={devices[key].details}
-                  onChange={(e) =>
-                    updateDevice(key, "details", e.target.value)
-                  }
-                  placeholder="Detalhes..."
-                  className="text-sm"
-                />
-              )}
-            </div>
-          ))}
-        </div>
-      </Section>
-
-      {/* Section 4 - Ventilation */}
-      <Section title="Ventilacao">
-        <div className="grid grid-cols-3 gap-4">
-          <Field label="Modo" value={ventMode} onChange={setVentMode} />
-          <Field label="FiO2" value={fio2} onChange={setFio2} />
-          <Field label="PEEP" value={peep} onChange={setPeep} />
-        </div>
-      </Section>
-
-      {/* Section 5 - Sedation */}
-      <Section title="Sedacao">
+      {/* Section 4 - Ventilacao Mecanica */}
+      <Section title="Ventilacao Mecanica">
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Drogas" value={sedDrugs} onChange={setSedDrugs} />
-          <Field label="RASS" value={rass} onChange={setRass} />
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">
+              Conforto
+            </label>
+            <select
+              value={ventConforto}
+              onChange={(e) => setVentConforto(e.target.value)}
+              className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
+            >
+              <option value="">--</option>
+              <option value="confortavel">Confortavel</option>
+              <option value="desconfortavel">Desconfortavel</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">
+              Objetivo
+            </label>
+            <select
+              value={ventObjetivo}
+              onChange={(e) => setVentObjetivo(e.target.value)}
+              className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
+            >
+              <option value="">--</option>
+              <option value="manter">Manter</option>
+              <option value="desmamar">Desmamar</option>
+            </select>
+          </div>
         </div>
       </Section>
 
-      {/* Section 6 - Others */}
-      <Section title="Outros">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field
-            label="Antibioticos"
-            value={antibiotics}
-            onChange={setAntibiotics}
-          />
-          <Field
-            label="Hemodinamica"
-            value={hemodynamics}
-            onChange={setHemodynamics}
-          />
-          <Field label="Diurese" value={diuresis} onChange={setDiuresis} />
+      {/* Section 5 - Dieta */}
+      <Section title="Dieta">
+        <div>
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">
+            Via
+          </label>
+          <select
+            value={dietaVia}
+            onChange={(e) => setDietaVia(e.target.value)}
+            className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
+          >
+            <option value="">--</option>
+            <option value="oral">Oral</option>
+            <option value="enteral">Enteral</option>
+            <option value="parenteral">Parenteral</option>
+            <option value="zero">Zero (Jejum)</option>
+          </select>
         </div>
       </Section>
 
-      {/* Section 7 - Vital Signs */}
-      <Section title="Sinais Vitais">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      {/* Section 6 - Hemodinamica */}
+      <Section title="Hemodinamica">
+        <div className="grid grid-cols-2 gap-4">
           <Field label="PA" value={pa} onChange={setPa} placeholder="120/80" />
-          <Field label="FC" value={fc} onChange={setFc} placeholder="80" />
-          <Field
-            label="Temperatura"
-            value={temp}
-            onChange={setTemp}
-            placeholder="36.5"
-          />
-          <Field
-            label="SatO2"
-            value={sato2}
-            onChange={setSato2}
-            placeholder="98"
-          />
+          <Field label="Drogas Vasoativas" value={dva} onChange={setDva} placeholder="Ex: Noradrenalina 0.1 mcg/kg/min" />
         </div>
+      </Section>
+
+      {/* Section 7 - Antibiotico */}
+      <Section title="Antibiotico">
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="Qual" value={atbNome} onChange={setAtbNome} placeholder="Ex: Meropenem" />
+          <Field label="Dias" value={atbDias} onChange={setAtbDias} placeholder="Ex: 7" />
+        </div>
+      </Section>
+
+      {/* Section 8 - Profilaxia */}
+      <Section title="Profilaxia">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <label className="flex items-center gap-2 p-3 rounded-xl border border-border cursor-pointer hover:bg-muted/50 transition-colors">
+            <input
+              type="checkbox"
+              checked={profUlcera}
+              onChange={(e) => setProfUlcera(e.target.checked)}
+              className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+            />
+            <span className="text-sm font-medium text-foreground">Ulcera por Pressao</span>
+          </label>
+          <label className="flex items-center gap-2 p-3 rounded-xl border border-border cursor-pointer hover:bg-muted/50 transition-colors">
+            <input
+              type="checkbox"
+              checked={profLamg}
+              onChange={(e) => setProfLamg(e.target.checked)}
+              className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+            />
+            <span className="text-sm font-medium text-foreground">LAMG</span>
+          </label>
+          <label className="flex items-center gap-2 p-3 rounded-xl border border-border cursor-pointer hover:bg-muted/50 transition-colors">
+            <input
+              type="checkbox"
+              checked={profTrombose}
+              onChange={(e) => setProfTrombose(e.target.checked)}
+              className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+            />
+            <span className="text-sm font-medium text-foreground">Trombose</span>
+          </label>
+        </div>
+      </Section>
+
+      {/* Section 9 - Plano Terapeutico */}
+      <Section title="Plano Terapeutico">
+        <Textarea
+          value={plano}
+          onChange={(e) => setPlano(e.target.value)}
+          rows={3}
+          placeholder="Ex: Alta prevista para amanha, suspender ATB, aumentar sedacao..."
+          className="resize-none"
+        />
       </Section>
 
       {/* Error */}
