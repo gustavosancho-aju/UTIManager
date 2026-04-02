@@ -132,39 +132,9 @@ function GravarPage() {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr,320px] gap-6">
-      {/* Roteiro - aparece primeiro em mobile */}
-      <div className="order-first lg:order-last">
-        <div className="glass-card rounded-xl border border-border p-4 lg:sticky lg:top-6">
-          <div className="flex items-center gap-2 mb-4">
-            <ClipboardList className="w-4 h-4 text-primary" />
-            <h2 className="text-sm font-bold text-foreground">Roteiro UTI</h2>
-          </div>
-          <div className="space-y-2">
-            {ROTEIRO_ITEMS.map((item) => (
-              <div
-                key={item.num}
-                className="flex items-start gap-3 p-2.5 rounded-lg bg-muted/50 border border-border/50"
-              >
-                <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">
-                  {item.num}
-                </span>
-                <div>
-                  <p className="text-[13px] font-semibold text-foreground leading-tight">
-                    {item.label}
-                  </p>
-                  <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">
-                    {item.hint}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Area de gravacao */}
-      <div className="order-last lg:order-first">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+      {/* Coluna esquerda — Area de gravacao */}
+      <div>
         {/* Patient info */}
         {patient && (
           <div className="mb-6 glass-card rounded-xl border border-primary/20 p-4 text-center">
@@ -379,6 +349,39 @@ function GravarPage() {
             </Button>
           </div>
         )}
+      </div>
+
+      {/* Coluna direita — Roteiro UTI */}
+      <div>
+        <div className="glass-card rounded-xl border border-border p-4 md:sticky md:top-6">
+          <div className="flex items-center gap-2 mb-4">
+            <ClipboardList className="w-4 h-4 text-primary" />
+            <h2 className="text-sm font-bold text-foreground">Roteiro UTI</h2>
+          </div>
+          <p className="text-[11px] text-muted-foreground mb-3">
+            Siga estes topicos ao narrar a evolucao:
+          </p>
+          <div className="space-y-1.5">
+            {ROTEIRO_ITEMS.map((item) => (
+              <div
+                key={item.num}
+                className="flex items-start gap-2.5 p-2 rounded-lg bg-muted/50 border border-border/50"
+              >
+                <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                  {item.num}
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[13px] font-semibold text-foreground leading-tight">
+                    {item.label}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">
+                    {item.hint}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
