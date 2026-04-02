@@ -37,6 +37,7 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
   const [error, setError] = useState<string | null>(null);
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const finalTranscriptRef = useRef("");
 
   const [speechAvailable, setSpeechAvailable] = useState(false);
 
@@ -52,6 +53,13 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
     setSpeechAvailable(!!getSpeechAPI());
   }, []);
 
+  // Sync ref when user edits transcription manually
+  useEffect(() => {
+    if (!recognitionRef.current) {
+      finalTranscriptRef.current = transcription;
+    }
+  }, [transcription]);
+
   const startRecording = useCallback(() => {
     const SpeechRecognitionAPI = getSpeechAPI();
     if (!SpeechRecognitionAPI) return;
@@ -63,19 +71,22 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
 
-    let finalTranscript = transcription;
+    // Use ref to avoid stale closure
+    finalTranscriptRef.current = transcription;
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
       let interim = "";
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const t = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
-          finalTranscript += (finalTranscript ? " " : "") + t;
+          finalTranscriptRef.current += (finalTranscriptRef.current ? " " : "") + t;
         } else {
           interim = t;
         }
       }
-      setTranscription(finalTranscript + (interim ? " " + interim : ""));
+      setTranscription(
+        finalTranscriptRef.current + (interim ? " " + interim : "")
+      );
     };
 
     recognition.onerror = (e: Event & { error: string }) => {
@@ -83,6 +94,7 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
     };
 
     recognition.onend = () => {
+      // Auto-restart if still recording (browser stops after silence)
       if (recognitionRef.current) {
         try {
           recognition.start();
@@ -99,7 +111,7 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
       setSeconds(0);
       intervalRef.current = setInterval(() => setSeconds((s) => s + 1), 1000);
     } catch {
-      setError("Microfone indisponível.");
+      setError("Microfone indisponivel.");
     }
   }, [transcription]);
 
