@@ -9,6 +9,8 @@ import {
   ChevronUp,
   FileText,
   Loader2,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -253,6 +255,25 @@ export default function RevisarPage() {
 
   const isNewPatient = !patientId;
 
+  // Validacao do roteiro — verifica quais itens foram preenchidos
+  const roteiroValidation = [
+    { num: 1, label: "Diagnostico", filled: !!diagnostico.trim(), sectionId: "diagnostico" },
+    { num: 2, label: "Dias de Internacao", filled: !!diasInternacao.trim(), sectionId: "diagnostico" },
+    { num: 3, label: "Sedacao", filled: !!(sedDrogas.trim() || rass.trim() || sedObjetivo), sectionId: "sedacao" },
+    { num: 4, label: "Ventilacao Mecanica", filled: !!(ventConforto || ventObjetivo), sectionId: "ventilacao" },
+    { num: 5, label: "Dieta", filled: !!dietaVia, sectionId: "dieta" },
+    { num: 6, label: "Hemodinamica", filled: !!(pa.trim() || dva.trim()), sectionId: "hemodinamica" },
+    { num: 7, label: "Antibiotico", filled: !!(atbNome.trim() || atbDias.trim()), sectionId: "antibiotico" },
+    { num: 8, label: "Profilaxia", filled: profUlcera || profLamg || profTrombose, sectionId: "profilaxia" },
+    { num: 9, label: "Plano Terapeutico", filled: !!plano.trim(), sectionId: "plano" },
+  ];
+  const filledCount = roteiroValidation.filter((r) => r.filled).length;
+  const pendingItems = roteiroValidation.filter((r) => !r.filled);
+  const allFilled = pendingItems.length === 0;
+
+  // IDs de sections pendentes para destacar com borda
+  const pendingSections = new Set(pendingItems.map((r) => r.sectionId));
+
   return (
     <div className="max-w-3xl mx-auto">
       <div className="mb-6">
@@ -262,6 +283,55 @@ export default function RevisarPage() {
         <p className="text-sm text-muted-foreground">
           Confira e edite os dados extraidos pela IA antes de salvar
         </p>
+      </div>
+
+      {/* Validacao do Roteiro */}
+      <div className={`glass-card rounded-xl border p-4 mb-6 ${
+        allFilled
+          ? "border-green-500/30 bg-green-500/5"
+          : "border-amber-500/30 bg-amber-500/5"
+      }`}>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            {allFilled ? (
+              <CheckCircle2 className="w-5 h-5 text-green-500" />
+            ) : (
+              <AlertCircle className="w-5 h-5 text-amber-500" />
+            )}
+            <h2 className="text-sm font-bold text-foreground">
+              {allFilled
+                ? "Roteiro completo"
+                : `${filledCount}/9 itens identificados`}
+            </h2>
+          </div>
+          {!allFilled && (
+            <span className="text-[11px] font-medium text-amber-500">
+              {pendingItems.length} pendente{pendingItems.length > 1 ? "s" : ""}
+            </span>
+          )}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {roteiroValidation.map((item) => (
+            <button
+              key={item.num}
+              onClick={() => {
+                document.getElementById(`section-${item.sectionId}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+              }}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[12px] font-medium transition-colors cursor-pointer ${
+                item.filled
+                  ? "bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20"
+                  : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 animate-pulse"
+              }`}
+            >
+              {item.filled ? (
+                <CheckCircle2 className="w-3 h-3" />
+              ) : (
+                <AlertCircle className="w-3 h-3" />
+              )}
+              {item.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Transcription collapsible */}
@@ -315,7 +385,7 @@ export default function RevisarPage() {
       )}
 
       {/* Section 2 - Diagnostico */}
-      <Section title="Diagnostico">
+      <Section id="section-diagnostico" title="Diagnostico" pending={pendingSections.has("diagnostico")}>
         <div className="grid grid-cols-2 gap-4">
           <Field label="Diagnostico" value={diagnostico} onChange={setDiagnostico} placeholder="Ex: TCE, PNM" />
           <Field label="Dias de Internacao" value={diasInternacao} onChange={setDiasInternacao} placeholder="Ex: 5" />
@@ -323,7 +393,7 @@ export default function RevisarPage() {
       </Section>
 
       {/* Section 3 - Sedacao */}
-      <Section title="Sedacao">
+      <Section id="section-sedacao" title="Sedacao" pending={pendingSections.has("sedacao")}>
         <div className="grid grid-cols-3 gap-4">
           <Field label="Drogas" value={sedDrogas} onChange={setSedDrogas} placeholder="Ex: Midazolam, Fentanil" />
           <Field label="RASS" value={rass} onChange={setRass} placeholder="Ex: -2" />
@@ -345,7 +415,7 @@ export default function RevisarPage() {
       </Section>
 
       {/* Section 4 - Ventilacao Mecanica */}
-      <Section title="Ventilacao Mecanica">
+      <Section id="section-ventilacao" title="Ventilacao Mecanica" pending={pendingSections.has("ventilacao")}>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1 block">
@@ -379,7 +449,7 @@ export default function RevisarPage() {
       </Section>
 
       {/* Section 5 - Dieta */}
-      <Section title="Dieta">
+      <Section id="section-dieta" title="Dieta" pending={pendingSections.has("dieta")}>
         <div>
           <label className="text-xs font-medium text-muted-foreground mb-1 block">
             Via
@@ -399,7 +469,7 @@ export default function RevisarPage() {
       </Section>
 
       {/* Section 6 - Hemodinamica */}
-      <Section title="Hemodinamica">
+      <Section id="section-hemodinamica" title="Hemodinamica" pending={pendingSections.has("hemodinamica")}>
         <div className="grid grid-cols-2 gap-4">
           <Field label="PA" value={pa} onChange={setPa} placeholder="120/80" />
           <Field label="Drogas Vasoativas" value={dva} onChange={setDva} placeholder="Ex: Noradrenalina 0.1 mcg/kg/min" />
@@ -407,7 +477,7 @@ export default function RevisarPage() {
       </Section>
 
       {/* Section 7 - Antibiotico */}
-      <Section title="Antibiotico">
+      <Section id="section-antibiotico" title="Antibiotico" pending={pendingSections.has("antibiotico")}>
         <div className="grid grid-cols-2 gap-4">
           <Field label="Qual" value={atbNome} onChange={setAtbNome} placeholder="Ex: Meropenem" />
           <Field label="Dias" value={atbDias} onChange={setAtbDias} placeholder="Ex: 7" />
@@ -415,7 +485,7 @@ export default function RevisarPage() {
       </Section>
 
       {/* Section 8 - Profilaxia */}
-      <Section title="Profilaxia">
+      <Section id="section-profilaxia" title="Profilaxia" pending={pendingSections.has("profilaxia")}>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <label className="flex items-center gap-2 p-3 rounded-xl border border-border cursor-pointer hover:bg-muted/50 transition-colors">
             <input
@@ -448,7 +518,7 @@ export default function RevisarPage() {
       </Section>
 
       {/* Section 9 - Plano Terapeutico */}
-      <Section title="Plano Terapeutico">
+      <Section id="section-plano" title="Plano Terapeutico" pending={pendingSections.has("plano")}>
         <Textarea
           value={plano}
           onChange={(e) => setPlano(e.target.value)}
@@ -497,15 +567,34 @@ export default function RevisarPage() {
 }
 
 function Section({
+  id,
   title,
   children,
+  pending,
 }: {
+  id?: string;
   title: string;
   children: React.ReactNode;
+  pending?: boolean;
 }) {
   return (
-    <div className="glass-card rounded-xl border border-border p-5 mb-4">
-      <h2 className="text-base font-bold text-foreground mb-4">{title}</h2>
+    <div
+      id={id}
+      className={`glass-card rounded-xl border p-5 mb-4 transition-colors ${
+        pending
+          ? "border-amber-500/40 bg-amber-500/5"
+          : "border-border"
+      }`}
+    >
+      <div className="flex items-center gap-2 mb-4">
+        {pending && <AlertCircle className="w-4 h-4 text-amber-500 shrink-0" />}
+        <h2 className="text-base font-bold text-foreground">{title}</h2>
+        {pending && (
+          <span className="text-[10px] font-semibold text-amber-500 uppercase tracking-wider">
+            Pendente
+          </span>
+        )}
+      </div>
       {children}
     </div>
   );
